@@ -29,11 +29,9 @@ jobs:
         # dist/ as the Pages artifact. `astro build` picks up site + base from
         # astro.config.mjs (base = /penguin-portfolio in production).
         uses: withastro/action@v3
-        # Defaults are correct here (npm, node 20, path "."). Uncomment to pin:
-        # with:
-        #   path: .
-        #   node-version: 20
-        #   package-manager: npm
+        with:
+          # Astro requires Node >=22.12.0; the action defaults to 20.
+          node-version: 22
 
   deploy:
     needs: build
