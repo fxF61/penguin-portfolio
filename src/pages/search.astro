@@ -1,22 +1,87 @@
 ---
 import Base from '../layouts/Base.astro';
-// Phase 5 wires Pagefind here. This is the styled shell + a graceful
-// no-JS message so the route exists from Phase 0 onward.
+// BASE_URL may lack a trailing slash ('/penguin-portfolio'); normalize so URL
+// concatenation is correct. '/penguin-portfolio/' in prod, '/' in dev.
+const base = import.meta.env.BASE_URL.replace(/\/+$/, '') + '/';
 ---
 <Base title="Search" intensity="calm" topVeil>
   <section class="wrap wrap--narrow search">
     <p class="eyebrow eyebrow--lily">Find</p>
     <h1 class="display">Search</h1>
-    <p class="lede">Full-text search across writeups and notes. Wired up in Phase 5 (Pagefind).</p>
-    <div class="search__box" data-pagefind-ui>
-      <input type="search" placeholder="Search is added in Phase 5…" aria-label="Search" disabled />
-    </div>
+    <p class="lede">Full-text search across writeups and notes.</p>
+    <div id="search" class="search__ui"></div>
+    <noscript><p class="meta">Search needs JavaScript enabled.</p></noscript>
   </section>
 </Base>
 
+<link rel="stylesheet" href={`${base}pagefind/pagefind-ui.css`} />
+<script is:inline define:vars={{ base }}>
+  (() => {
+    function init() {
+      // eslint-disable-next-line no-undef
+      new PagefindUI({
+        element: '#search',
+        bundlePath: base + 'pagefind/',   // index lives under the deploy base
+        showImages: false,
+        showSubResults: true,
+        excerptLength: 22,
+        // astro-pagefind already records base-prefixed result URLs — don't re-add.
+      });
+    }
+    const s = document.createElement('script');
+    s.src = base + 'pagefind/pagefind-ui.js';
+    s.onload = init;
+    document.head.appendChild(s);
+  })();
+</script>
+
 <style>
-  .search { padding-block: var(--space-3xl); display: grid; gap: var(--space-m); min-height: 50svh; }
+  .search { padding-block: var(--space-3xl); display: grid; gap: var(--space-m); min-height: 60svh; }
   .search h1 { font-size: var(--step-5); }
-  .search__box input { width: 100%; padding: var(--space-m) var(--space-l); font-family: var(--font-mono); font-size: var(--step-0); background: var(--paper-raised); border: var(--hairline); border-radius: var(--radius-pill); }
-  .search__box input:focus-visible { border-color: var(--lily); }
+  .search__ui { margin-top: var(--space-m); }
+</style>
+
+<style is:global>
+  /* Pagefind UI, themed to the site (crimson, serif, card-like results) */
+  #search {
+    --pagefind-ui-scale: 0.9;
+    --pagefind-ui-primary: var(--lily);
+    --pagefind-ui-text: var(--ink);
+    --pagefind-ui-background: var(--paper-raised);
+    --pagefind-ui-border: var(--rule-strong);
+    --pagefind-ui-tag: var(--paper-sunk);
+    --pagefind-ui-border-width: 1px;
+    --pagefind-ui-border-radius: var(--radius-m);
+    --pagefind-ui-font: var(--font-body);
+  }
+  #search .pagefind-ui__search-input {
+    font-family: var(--font-mono); font-size: var(--step-0);
+    background: var(--paper-raised); color: var(--ink);
+    border: 1px solid var(--rule-strong); border-radius: var(--radius-pill);
+    padding: var(--space-m) var(--space-l);
+  }
+  #search .pagefind-ui__search-input::placeholder { color: var(--mute); }
+  #search .pagefind-ui__search-input:focus {
+    outline: none; border-color: var(--lily);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--lily) 18%, transparent);
+  }
+  #search .pagefind-ui__search-clear { background: none; color: var(--mute); }
+  #search .pagefind-ui__search-clear:hover { color: var(--lily-deep); }
+  #search .pagefind-ui__message { font-family: var(--font-label); letter-spacing: var(--label-tracking); text-transform: var(--label-transform); font-size: var(--step--1); color: var(--mute); }
+
+  #search .pagefind-ui__results { display: grid; gap: var(--space-m); margin-top: var(--space-l); }
+  #search .pagefind-ui__result {
+    padding: var(--space-m) var(--space-l);
+    background: var(--paper-raised);
+    border: var(--hairline); border-radius: var(--radius-m);
+    transition: border-color var(--dur-2) var(--ease-soft), box-shadow var(--dur-2) var(--ease-soft), transform var(--dur-2) var(--ease-soft);
+  }
+  #search .pagefind-ui__result:hover { border-color: var(--rose); box-shadow: var(--shadow-soft); transform: translateY(-2px); }
+  #search .pagefind-ui__result-title { font-family: var(--font-display); font-size: var(--step-1); line-height: 1.15; }
+  #search .pagefind-ui__result-title a, #search .pagefind-ui__result-link { color: var(--ink); text-decoration: none; }
+  #search .pagefind-ui__result:hover .pagefind-ui__result-title a { color: var(--lily-deep); }
+  #search .pagefind-ui__result-excerpt { color: var(--ink-soft); font-size: var(--step--1); line-height: 1.5; }
+  /* matched terms in brand red (no highlight box) */
+  #search .pagefind-ui__result mark, #search mark { background: none; color: var(--lily-deep); font-weight: 600; }
+  #search .pagefind-ui__result-tags .pagefind-ui__result-tag { background: var(--paper-sunk); color: var(--ink-soft); }
 </style>

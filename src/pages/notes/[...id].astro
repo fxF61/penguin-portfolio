@@ -15,7 +15,7 @@ const { data } = entry;
 const { Content } = await render(entry);
 ---
 <Base title={data.title} description={data.description} intensity="calm">
-  <article class="wrap wrap--narrow note">
+  <article class="wrap wrap--narrow note" data-pagefind-body>
     <header class="note__head">
       <p class="eyebrow eyebrow--lily">Note</p>
       <h1 class="display note__title">{data.title}</h1>

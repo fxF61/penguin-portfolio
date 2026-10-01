@@ -1,5 +1,6 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
+import pagefind from 'astro-pagefind';
 
 // Project site on GitHub Pages: https://fxf61.github.io/penguin-portfolio/
 // The base only applies to production builds (and `astro preview`); `astro dev`
@@ -9,6 +10,9 @@ const isDev = process.argv.includes('dev');
 export default defineConfig({
   site: 'https://fxf61.github.io',
   base: isDev ? '/' : '/penguin-portfolio',
+  // Pagefind: indexes dist/ during `astro build` (runs in CI regardless of how
+  // the build is invoked) and emits dist/pagefind/ (index + UI bundle).
+  integrations: [pagefind()],
   // Astro 7 defaults to JSX-style whitespace stripping; keep HTML-aware
   // compression so templates behave like the Hugo output we'll port to.
   compressHTML: true,
