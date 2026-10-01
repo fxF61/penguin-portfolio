@@ -20,12 +20,15 @@ interface Props {
   description?: string;
   /** atmosphere: veil, grain, motion allowed. calm: reading-first, no ambient effects. */
   intensity?: 'atmosphere' | 'calm';
+  /** opt-in soft rose gradient across the top of the page (inner index/utility pages). */
+  topVeil?: boolean;
 }
 
 const {
   title,
   description = 'Writeups and notes on Active Directory, Hack The Box and CTFs — by penguin.',
   intensity = 'atmosphere',
+  topVeil = false,
 } = Astro.props;
 const fullTitle = title ? `${title} · penguin` : 'penguin — writeups & notes';
 ---
@@ -54,7 +57,7 @@ const fullTitle = title ? `${title} · penguin` : 'penguin — writeups & notes'
     <a class="skip-link" href="#main">Skip to content</a>
     {intensity === 'atmosphere' && <div class="veil" aria-hidden="true"></div>}
     <SiteHeader />
-    <main id="main">
+    <main id="main" class:list={[{ 'has-top-veil': topVeil }]}>
       <slot />
     </main>
     <SiteFooter />

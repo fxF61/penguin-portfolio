@@ -155,6 +155,21 @@ hr { border: 0; border-top: var(--hairline); }
   mask-image: linear-gradient(180deg, #000 55%, transparent);
 }
 
+/* Page-top gradient for the inner index/utility pages (home uses the taller
+   hero veil instead). Same rose→paper language — soft rose → warm bone in
+   light, deep wine → near-black in dark. Painted as the <main> background so it
+   sits above the page background but behind the content, occupying only the
+   first few hundred px; opt-in per page via Base's `topVeil`, so the homepage
+   and individual article pages are untouched. */
+main.has-top-veil {
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--rose) 58%, var(--paper)) 0%,
+      color-mix(in srgb, var(--rose) 16%, var(--paper)) 45%,
+      var(--paper) 100%)
+    no-repeat top center / 100% 22rem;
+}
+
 /* Paper grain — very faint, keeps the bone from looking flat on big screens.
    A fixed mix-blend-mode overlay forces the compositor to re-blend the whole
    frame whenever the hero animates, so it's confined to the top (not fixed/
