@@ -242,22 +242,23 @@ const tallLeft: F[] = [
     const layerW = () => petalLayer.clientWidth || root.clientWidth || 1200;
     const layerH = () => petalLayer.clientHeight || 700;
     // a few more petals in dark mode so the ambient field reads as full as light
-    const target = phone.matches ? 36 : small.matches ? 55 : 90;   // ambient breeze: 90 desktop / 55 tablet / 36 phone
+    const target = phone.matches ? 45 : small.matches ? 70 : 110;  // ambient breeze: 110 desktop / 70 tablet / 45 phone
     const pool: HTMLElement[] = [];
     let active = 0;
 
     const launch = (p: HTMLElement) => {
       if (stopped) return;
-      const W = layerW(), H = layerH(), depth = Math.random();
-      p.style.color = Math.random() < 0.5 ? 'var(--lily)' : '#e7dcd7';   // red / pale mix
-      const size = rand(8, 17);                                          // small→medium only
-      const startX = rand(-0.05, 1.05) * W;
-      const startY = rand(0.55, 1.04) * H;                               // rise from the field
-      const endX = startX - rand(0.14, 0.5) * W;                         // prevailing breeze: leftward
-      const endY = startY - rand(0.6, 1.1) * H;                          // upward, off-frame
+      const W = layerW(), H = layerH(), depth = Math.random();          // 0 far → 1 near
+      // colour comes from CSS (light-dark, always contrasting); vary tone for depth
+      p.classList.toggle('drift-petal--b', Math.random() < 0.4);
+      const size = rand(7, 11) + depth * 13;                            // 7 (far) → 24px (near)
+      const startX = rand(-0.05, 1.05) * W;                            // full width
+      const startY = rand(-0.05, 1.04) * H;                            // FULL hero height — sky included
+      const endX = startX - rand(0.12, 0.5) * W;                        // prevailing breeze: leftward
+      const endY = startY - rand(0.4, 1.0) * H;                         // drift up (varied), off-frame
       const rot = rand(-90, 90);
-      const op = rand(0.26, 0.56) * (1 - depth * 0.3);
-      const speed = rand(12000, 21000) * (0.6 + depth * 0.5);            // slow, varied by depth
+      const op = (0.34 + depth * 0.42) * rand(0.85, 1.1);               // ~0.3 (far) → ~0.8 (near)
+      const speed = rand(13000, 22000) * (0.6 + depth * 0.5);           // slow, varied by depth
       p.style.width = `${size}px`; p.style.top = '0'; p.style.left = '0';
       active++;
       const a = p.animate([
@@ -420,8 +421,11 @@ const tallLeft: F[] = [
 <style is:global>
   .drift-petal {
     position: absolute; left: 0; top: 0; width: 14px;
-    opacity: 0; line-height: 0; color: var(--lily); will-change: transform, opacity;
+    opacity: 0; line-height: 0; will-change: transform, opacity;
+    /* always contrast the sky: crimson in light, pale in dark */
+    color: light-dark(var(--lily), #efe7e3);
   }
+  .drift-petal--b { color: light-dark(var(--lily-deep), #cdbfc1); }  /* second tone for depth */
   .drift-petal svg { display: block; width: 100%; height: auto; overflow: visible; }
   .drift-petal .petal, .drift-petal .petal.is-back { fill: currentColor; }
   @media (prefers-reduced-motion: reduce) { .drift-petal { display: none; } }
