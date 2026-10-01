@@ -1,0 +1,201 @@
+/* ==========================================================================
+   Design tokens — the single source of truth.
+   Everything else references these; the Hugo port copies this file as-is.
+   Light theme only (by design, no dark mode).
+   ========================================================================== */
+
+:root {
+  /* Follow the system by default; the toggle overrides via [data-theme]. Every
+     themeable colour uses light-dark(LIGHT, DARK) — LIGHT values are unchanged. */
+  color-scheme: light dark;
+
+  /* ---------- colour: paper & ink ---------- */
+  --paper: light-dark(#f8f5f2, #100b0d);          /* page — warm bone / dark plum */
+  --paper-raised: light-dark(#fcfaf8, #1b1417);   /* cards, popovers */
+  --paper-sunk: light-dark(#f1ebe6, #080506);     /* code blocks, wells (darkest) */
+  --rule: light-dark(#e6dcd5, #2a2023);           /* hairlines */
+  --rule-strong: light-dark(#d4c6bd, #3d2f33);    /* borders that must read */
+
+  --ink: light-dark(#1a1414, #f4efec);            /* primary text */
+  --ink-soft: light-dark(#4a3f3d, #cdc1bc);       /* secondary text */
+  --mute: light-dark(#74675f, #a89a95);           /* meta — AA on both papers */
+  --faint: light-dark(#a3958f, #6c5f5a);          /* decorative only */
+
+  /* ---------- colour: higanbana ---------- */
+  --lily: light-dark(#c1272d, #e5565a);           /* accent — brightened for dark AA */
+  --lily-deep: light-dark(#8b0000, #c1272d);      /* hover, shadowed petals */
+  --lily-ink: light-dark(#5a1414, #f0c2c4);       /* darkest detail / light on dark */
+  --rose: light-dark(#e3b5b8, #7c4d52);           /* dusty pink */
+  --rose-soft: light-dark(#f0d6d6, #3a2327);      /* gradient top */
+  --blush: light-dark(#f6e6e3, #241619);          /* tinted surfaces */
+  --mist: light-dark(#e9e8ea, #20181b);           /* cool haze */
+  --stem: light-dark(#8a9a84, #384a33);           /* scapes */
+
+  --selection: light-dark(rgb(193 39 45 / 0.16), rgb(229 86 90 / 0.3));
+  --focus: var(--lily);
+
+  /* atmosphere veil — rose horizon (light) / subtle deep-red horizon (dark) */
+  --veil-rose: light-dark(
+    radial-gradient(120% 70% at 70% 0%, rgb(240 214 214 / 0.95) 0%, rgb(240 214 214 / 0) 60%) no-repeat,
+    radial-gradient(150% 95% at 64% -8%, rgb(150 28 36 / 0.24) 0%, rgb(150 28 36 / 0) 55%) no-repeat
+  );
+  /* cool-haze layer (light only) — preserves the original light veil exactly */
+  --veil-mist: light-dark(
+    radial-gradient(80% 50% at 10% 0%, rgb(233 232 234 / 0.8) 0%, rgb(233 232 234 / 0) 70%) no-repeat,
+    linear-gradient(rgb(0 0 0 / 0), rgb(0 0 0 / 0))
+  );
+  /* base layer, composited under the others — no hard band at the top */
+  --veil-base: light-dark(
+    linear-gradient(180deg, var(--blush) 0%, var(--paper) 100%),
+    linear-gradient(180deg, color-mix(in srgb, #6a0f16 12%, var(--paper)) 0%, var(--paper) 62%)
+  );
+
+  /* ---------- type: families (Pairing A — default) ---------- */
+  --font-display: 'Cormorant Garamond Variable', 'Cormorant Garamond', 'EB Garamond', Garamond, 'Times New Roman', serif;
+  --font-body: 'Newsreader Variable', Newsreader, 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+  --font-mono: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  --font-label: var(--font-body);   /* nav, eyebrows, tags */
+  --font-kanji: 'Higanbana Mincho', 'Shippori Mincho', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
+
+  --display-weight: 400;
+  --display-italic-weight: 400;
+  --display-tracking: -0.01em;
+  --label-transform: uppercase;
+  --label-tracking: 0.16em;
+  --label-size: 0.78em;
+
+  /* ---------- type: fluid scale (360px → 1280px) ---------- */
+  --step--2: 0.75rem;
+  --step--1: clamp(0.906rem, 0.894rem + 0.054vw, 0.938rem); /* 14.5 → 15   */
+  --step-0:  clamp(1.062rem, 1.014rem + 0.217vw, 1.188rem); /* 17   → 19   */
+  --step-1:  clamp(1.275rem, 1.155rem + 0.536vw, 1.583rem); /* 20.4 → 25.3 */
+  --step-2:  clamp(1.530rem, 1.303rem + 1.009vw, 2.110rem); /* 24.5 → 33.8 */
+  --step-3:  clamp(1.836rem, 1.454rem + 1.699vw, 2.813rem); /* 29.4 → 45   */
+  --step-4:  clamp(2.203rem, 1.598rem + 2.689vw, 3.749rem); /* 35.3 → 60   */
+  --step-5:  clamp(2.644rem, 1.723rem + 4.094vw, 4.998rem); /* 42.3 → 80   */
+  --step-6:  clamp(3.173rem, 1.807rem + 6.069vw, 6.662rem); /* 50.8 → 106.6 hero */
+
+  --leading-tight: 1.05;
+  --leading-snug: 1.25;
+  --leading-body: 1.65;
+
+  /* ---------- space ---------- */
+  --space-2xs: 0.25rem;
+  --space-xs: 0.5rem;
+  --space-s: 0.75rem;
+  --space-m: 1rem;
+  --space-l: 1.5rem;
+  --space-xl: 2.25rem;
+  --space-2xl: clamp(2.5rem, 1.913rem + 2.609vw, 4rem);
+  --space-3xl: clamp(3.5rem, 2.326rem + 5.217vw, 6.5rem);
+  --space-4xl: clamp(5rem, 2.652rem + 10.435vw, 11rem);
+
+  /* ---------- layout ---------- */
+  --gutter: clamp(1rem, 0.6rem + 2.5vw, 2.5rem);  /* ≥16px on phones */
+  --wrap: 76rem;
+  --wrap-narrow: 46rem;
+  --measure: 66ch;
+
+  /* ---------- shape & depth ---------- */
+  --radius-s: 2px;
+  --radius-m: 6px;
+  --radius-pill: 999px;
+  --hairline: 1px solid var(--rule);
+  --shadow-soft: 0 1px 0 rgb(26 20 20 / 0.03), 0 18px 40px -24px rgb(139 0 0 / 0.22);
+  --shadow-lift: 0 1px 0 rgb(26 20 20 / 0.04), 0 28px 60px -28px rgb(139 0 0 / 0.3);
+
+  /* ---------- motion (level 3: present, never loud) ---------- */
+  --ease-soft: cubic-bezier(0.22, 0.61, 0.36, 1);   /* UI transitions */
+  --ease-bloom: cubic-bezier(0.16, 1, 0.3, 1);      /* reveals, petals opening */
+  --ease-drift: cubic-bezier(0.45, 0, 0.55, 1);     /* ambient sway, loops */
+  --dur-1: 160ms;   /* hover, focus */
+  --dur-2: 320ms;   /* small state changes */
+  --dur-3: 700ms;   /* reveals */
+  --dur-4: 1400ms;  /* hero bloom */
+  --dur-drift: 14s; /* ambient loops */
+
+  /* ---------- code (Shiki css-variables → our tokens; Chroma reuses these) ---------- */
+  --code-bg: var(--paper-sunk);
+  --code-fg: light-dark(#2b2221, #e6ddd8);
+  --code-keyword: light-dark(#8b0000, #ff8f8f);
+  --code-string: light-dark(#4d5e44, #a7cf98);
+  --code-comment: light-dark(#74675f, #8f827c);
+  --code-function: light-dark(#7a2b3a, #f0a6b0);
+  --code-constant: light-dark(#9a3b17, #e6a56a);
+  --code-parameter: light-dark(#5b4a6b, #c1b0e0);
+  --code-punct: light-dark(#74675f, #8f827c);
+  --code-link: var(--lily);
+}
+
+/* non-colour hero-atmosphere tokens (light-dark() is colour-only) */
+:root {
+  --nav-h: 5.25rem;                 /* overlay nav height (measured ~84px) */
+  --moon-halo-inset: -24%;
+  --moon-glow: 0 0 0 0 transparent;
+  --moonlight-blend: multiply;
+  --moonlight-op: 0.09;
+}
+:root[data-theme='dark'] {
+  --moon-halo-inset: -15%;                        /* halo reach ~halved */
+  --moon-glow: 0 0 34px 2px rgb(120 18 24 / 0.12);/* matte, not a flare */
+  --moonlight-blend: screen;
+  --moonlight-op: 0.1;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --moon-halo-inset: -15%;
+    --moon-glow: 0 0 34px 2px rgb(120 18 24 / 0.12);
+    --moonlight-blend: screen;
+    --moonlight-op: 0.1;
+  }
+}
+
+@media (max-width: 34rem) { :root { --nav-h: 8.5rem; } }  /* nav stacks taller on phones */
+
+/* ---------- theme override: the nav toggle sets [data-theme] ---------- */
+:root[data-theme='light'] { color-scheme: light; }
+:root[data-theme='dark'] { color-scheme: dark; }
+/* Smooth cross-fade while switching (added briefly by the toggle). Scoped to
+   UI surfaces — NOT fill/stroke on `*`, which would put a transition on the
+   ~10k carpet <path>s and repaint the whole field every frame. The SVG flowers
+   snap (hidden under the gust); only paper/ink/borders cross-fade. */
+.theme-anim :is(body, header, main, section, article, a, p, h1, h2, h3, h4, span, li,
+  time, code, pre, button, input, .card, .btn, [class*='card'], [class*='badge']) {
+  transition: background-color 0.38s ease, color 0.38s ease, border-color 0.38s ease,
+    box-shadow 0.38s ease !important;
+}
+.theme-anim body { transition: background-color 0.38s ease !important; }
+
+/* ---------- alternate pairings (loaded on /styleguide only) ---------- */
+:root[data-pairing='b'] {
+  /* "Epitaph" — inscriptional labels, old-style text */
+  --font-display: 'Cormorant Garamond Variable', 'EB Garamond', serif;
+  --font-body: 'EB Garamond Variable', 'EB Garamond', Garamond, Georgia, serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --font-label: 'Cinzel Variable', Cinzel, serif;
+  --label-transform: none; /* Cinzel is caps by design */
+  --label-tracking: 0.12em;
+  --label-size: 0.74em;
+}
+
+:root[data-pairing='c'] {
+  /* "Modern requiem" — didone display, sans text */
+  --font-display: 'Bodoni Moda Variable', 'Bodoni Moda', Didot, serif;
+  --font-body: 'Inter Variable', Inter, system-ui, sans-serif;
+  --font-mono: 'Victor Mono Variable', 'Victor Mono', ui-monospace, monospace;
+  --font-label: 'Inter Variable', Inter, system-ui, sans-serif;
+  --display-weight: 400;
+  --display-tracking: -0.025em;
+  --label-tracking: 0.14em;
+  --label-size: 0.72em;
+  --leading-body: 1.6;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-1: 0ms;
+    --dur-2: 0ms;
+    --dur-3: 0ms;
+    --dur-4: 0ms;
+  }
+}

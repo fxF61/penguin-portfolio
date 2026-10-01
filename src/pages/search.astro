@@ -1,0 +1,22 @@
+---
+import Base from '../layouts/Base.astro';
+// Phase 5 wires Pagefind here. This is the styled shell + a graceful
+// no-JS message so the route exists from Phase 0 onward.
+---
+<Base title="Search" intensity="calm">
+  <section class="wrap wrap--narrow search">
+    <p class="eyebrow eyebrow--lily">Find</p>
+    <h1 class="display">Search</h1>
+    <p class="lede">Full-text search across writeups and notes. Wired up in Phase 5 (Pagefind).</p>
+    <div class="search__box" data-pagefind-ui>
+      <input type="search" placeholder="Search is added in Phase 5…" aria-label="Search" disabled />
+    </div>
+  </section>
+</Base>
+
+<style>
+  .search { padding-block: var(--space-3xl); display: grid; gap: var(--space-m); min-height: 50svh; }
+  .search h1 { font-size: var(--step-5); }
+  .search__box input { width: 100%; padding: var(--space-m) var(--space-l); font-family: var(--font-mono); font-size: var(--step-0); background: var(--paper-raised); border: var(--hairline); border-radius: var(--radius-pill); }
+  .search__box input:focus-visible { border-color: var(--lily); }
+</style>

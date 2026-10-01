@@ -1,0 +1,56 @@
+/* ==========================================================================
+   Higanbana artwork — styles for the generated SVGs (scripts/draw-lily.mjs).
+   The SVG files carry only geometry + classes; every colour and line
+   weight lives here, so one drawing renders in several tones.
+   ========================================================================== */
+
+.lily { display: inline-block; line-height: 0; }
+.lily > svg { width: 100%; height: auto; overflow: visible; }
+
+.lily .stem,
+.lily .pedicel,
+.lily .stamen {
+  fill: none;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+.lily .stem { stroke: var(--stem); stroke-width: var(--lily-stem, 1.5px); }
+.lily .pedicel { stroke: var(--stem); stroke-width: 1px; }
+.lily .stamen { stroke: var(--lily); stroke-width: var(--lily-hair, 1px); }
+.lily .anther { fill: var(--lily-ink); }
+.lily .petal { fill: var(--lily); }
+.lily .petal.is-back { fill: var(--lily-deep); }
+
+/* fill (default) — two-tone cel shading, the anime-reference look */
+
+/* line — engraving / pencil study: hairline outlines over paper */
+.lily--line .petal {
+  fill: var(--paper);
+  stroke: var(--lily);
+  stroke-width: var(--lily-hair, 0.8px);
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+.lily--line .petal.is-back { fill: var(--blush); }
+
+/* mist — a far-off bloom in the haze: rose, soft, no dark tone */
+.lily--mist { opacity: 0.55; filter: blur(0.6px); }
+.lily--mist .petal,
+.lily--mist .petal.is-back { fill: var(--rose); }
+.lily--mist .stamen { stroke: var(--rose); }
+.lily--mist .anther { fill: var(--rose); }
+.lily--mist .stem { stroke: color-mix(in srgb, var(--stem) 45%, var(--paper)); }
+
+/* ink — monochrome, for tiny marks where red would shout */
+.lily--ink .petal, .lily--ink .petal.is-back, .lily--ink .anther { fill: var(--ink); }
+.lily--ink .stamen, .lily--ink .stem, .lily--ink .pedicel { stroke: var(--ink); }
+
+/* field — colours driven by per-flower custom properties so a single drawing
+   can be tweened white → red. The vars are @property-registered in the hero
+   component for smooth colour transitions; fallbacks keep a static render sane. */
+.lily--field .petal { fill: var(--f-petal, #fbfaf9); }
+.lily--field .petal.is-back { fill: var(--f-petal-back, #e6e1dd); }
+.lily--field .stamen { stroke: var(--f-hair, #cbc4be); }
+.lily--field .anther { fill: var(--f-anther, #b0a49c); }
+.lily--field .stem,
+.lily--field .pedicel { stroke: var(--f-stem, #b9c0b2); }

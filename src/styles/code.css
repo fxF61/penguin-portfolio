@@ -1,0 +1,32 @@
+/* ==========================================================================
+   Code — maps Shiki's css-variables theme onto our --code-* tokens.
+   Hugo port: generate a Chroma stylesheet that reads the same tokens.
+   ========================================================================== */
+
+:root {
+  --astro-code-foreground: var(--code-fg);
+  --astro-code-background: var(--code-bg);
+  --astro-code-token-keyword: var(--code-keyword);
+  --astro-code-token-string: var(--code-string);
+  --astro-code-token-string-expression: var(--code-string);
+  --astro-code-token-comment: var(--code-comment);
+  --astro-code-token-function: var(--code-function);
+  --astro-code-token-constant: var(--code-constant);
+  --astro-code-token-parameter: var(--code-parameter);
+  --astro-code-token-punctuation: var(--code-punct);
+  --astro-code-token-link: var(--code-link);
+}
+
+pre {
+  font-size: 0.84em;
+  line-height: 1.6;
+  padding: var(--space-m) var(--space-l);
+  background: var(--code-bg);
+  color: var(--code-fg);
+  border-radius: var(--radius-s);
+  border-left: 2px solid var(--rose);
+  overflow-x: auto;
+  tab-size: 2;
+  font-variant-ligatures: none; /* ligatures in shell commands mislead */
+}
+pre code { font-size: inherit; background: none; padding: 0; }

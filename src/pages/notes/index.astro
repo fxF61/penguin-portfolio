@@ -1,0 +1,37 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getNotes, formatDate } from '../../lib';
+const notes = await getNotes();
+---
+<Base title="Notes" intensity="atmosphere">
+  <header class="wrap page-head">
+    <p class="eyebrow eyebrow--lily">Shorter form</p>
+    <h1 class="display">Notes</h1>
+    <p class="lede">Mental models, reference, things worth writing down once.</p>
+  </header>
+  <div class="wrap wrap--narrow">
+    <ul class="note-list" role="list">
+      {notes.map((n) => (
+        <li class="note-row">
+          <a href={`/notes/${n.id}/`}>
+            <span class="note-row__title">{n.data.title}</span>
+            <span class="note-row__desc">{n.data.description}</span>
+          </a>
+          <time class="meta" datetime={n.data.date.toISOString()}>{formatDate(n.data.date)}</time>
+        </li>
+      ))}
+    </ul>
+  </div>
+</Base>
+
+<style>
+  .page-head { padding-block: var(--space-2xl) var(--space-xl); display: grid; gap: var(--space-s); }
+  .page-head h1 { font-size: var(--step-5); }
+  .note-list { padding: 0; list-style: none; }
+  .note-row { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-l); flex-wrap: wrap; padding-block: var(--space-m); border-top: var(--hairline); }
+  .note-row:last-child { border-bottom: var(--hairline); }
+  .note-row a { display: grid; gap: 0.15rem; text-decoration: none; flex: 1; min-width: 15rem; }
+  .note-row__title { font-family: var(--font-display); font-size: var(--step-1); color: var(--ink); transition: color var(--dur-1); }
+  .note-row:hover .note-row__title { color: var(--lily-deep); }
+  .note-row__desc { color: var(--mute); font-size: var(--step--1); }
+</style>

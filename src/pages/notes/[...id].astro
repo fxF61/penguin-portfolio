@@ -1,0 +1,37 @@
+---
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Ornament from '../../components/Ornament.astro';
+import { getNotes, formatDate } from '../../lib';
+
+export async function getStaticPaths() {
+  const notes = await getNotes();
+  return notes.map((entry) => ({ params: { id: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const { data } = entry;
+const { Content } = await render(entry);
+---
+<Base title={data.title} description={data.description} intensity="calm">
+  <article class="wrap wrap--narrow note">
+    <header class="note__head">
+      <p class="eyebrow eyebrow--lily">Note</p>
+      <h1 class="display note__title">{data.title}</h1>
+      <p class="meta"><time datetime={data.date.toISOString()}>{formatDate(data.date)}</time></p>
+    </header>
+    <div class="prose"><Content /></div>
+    <Ornament />
+    <p class="note__back"><a href="/notes/">← All notes</a></p>
+  </article>
+</Base>
+
+<style>
+  .note { padding-block: var(--space-2xl) var(--space-xl); }
+  .note__head { margin-bottom: var(--space-2xl); display: grid; gap: var(--space-s); }
+  .note__title { font-size: var(--step-5); }
+  .note .prose { margin-inline: auto; }
+  .note__back { margin-top: var(--space-l); }
+  .note__back a { font-family: var(--font-label); font-size: var(--step--1); letter-spacing: var(--label-tracking); text-transform: var(--label-transform); text-decoration: none; color: var(--mute); }
+  .note__back a:hover { color: var(--lily-deep); }
+</style>

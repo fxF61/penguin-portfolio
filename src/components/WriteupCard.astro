@@ -1,0 +1,90 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { formatDate } from '../lib';
+import Lily from './Lily.astro';
+
+interface Props { entry: CollectionEntry<'writeups'>; }
+const { entry } = Astro.props;
+const { data } = entry;
+---
+<article class="card">
+  <a class="card__hit" href={`/writeups/${entry.id}/`} aria-labelledby={`t-${entry.id}`}></a>
+  <Lily variant="head" tone="mist" class="card__bloom" />
+
+  <header class="card__head">
+    <span class="eyebrow">{data.platform}</span>
+    <span class="card__badges mono">
+      <span class="badge badge--os" data-os={data.os}>{data.os}</span>
+      <span class="badge badge--diff" data-diff={data.difficulty}>{data.difficulty}</span>
+    </span>
+  </header>
+
+  <h3 class="card__title" id={`t-${entry.id}`}>{data.title}</h3>
+  <p class="card__desc">{data.description}</p>
+
+  <footer class="card__foot">
+    <ul class="card__tags mono" role="list">
+      {data.tags.slice(0, 3).map((t) => <li>#{t}</li>)}
+    </ul>
+    <time class="meta" datetime={data.date.toISOString()}>{formatDate(data.date)}</time>
+  </footer>
+</article>
+
+<style>
+  .card {
+    position: relative;
+    display: grid;
+    gap: var(--space-s);
+    padding: var(--space-l);
+    background: var(--paper-raised);
+    border: var(--hairline);
+    border-radius: var(--radius-m);
+    overflow: clip;
+    transition: border-color var(--dur-2) var(--ease-soft), box-shadow var(--dur-2) var(--ease-soft), transform var(--dur-2) var(--ease-soft);
+  }
+  .card:hover, .card:focus-within {
+    border-color: var(--rose);
+    box-shadow: var(--shadow-soft);
+    transform: translateY(-2px);
+  }
+  /* full-card click target; keeps real links (tags) above it via z-index */
+  .card__hit { position: absolute; inset: 0; z-index: 1; }
+  .card > :not(.card__hit) { position: relative; z-index: 2; pointer-events: none; }
+
+  /* a mist bloom bleeds in from the corner on hover */
+  .card :global(.card__bloom) {
+    position: absolute;
+    z-index: 0;
+    top: -1.5rem; right: -2rem;
+    width: 8rem;
+    opacity: 0;
+    transform: rotate(8deg) scale(0.9);
+    transition: opacity var(--dur-3) var(--ease-bloom), transform var(--dur-3) var(--ease-bloom);
+  }
+  .card:hover :global(.card__bloom), .card:focus-within :global(.card__bloom) {
+    opacity: 0.6; transform: rotate(0) scale(1);
+  }
+
+  .card__head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-s); }
+  .card__badges { display: inline-flex; gap: var(--space-2xs); }
+  .badge {
+    font-size: var(--step--2);
+    letter-spacing: 0.04em;
+    padding: 0.15em 0.5em;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--rule-strong);
+    color: var(--ink-soft);
+  }
+  .badge--os[data-os='Windows'] { border-color: color-mix(in srgb, var(--stem) 60%, transparent); }
+  .badge--diff[data-diff='Easy'] { color: var(--stem); border-color: color-mix(in srgb, var(--stem) 55%, transparent); }
+  .badge--diff[data-diff='Medium'] { color: var(--lily); border-color: color-mix(in srgb, var(--lily) 40%, transparent); }
+  .badge--diff[data-diff='Hard'],
+  .badge--diff[data-diff='Insane'] { color: var(--lily-deep); border-color: color-mix(in srgb, var(--lily-deep) 45%, transparent); }
+
+  .card__title { font-size: var(--step-2); line-height: 1.1; }
+  .card__desc { color: var(--ink-soft); font-size: var(--step-0); }
+
+  .card__foot { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-m); flex-wrap: wrap; }
+  .card__tags { display: flex; flex-wrap: wrap; gap: var(--space-2xs) var(--space-s); padding: 0; list-style: none; font-size: var(--step--2); color: var(--mute); }
+  .card__foot time { pointer-events: none; }
+</style>

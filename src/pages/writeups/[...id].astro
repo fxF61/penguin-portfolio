@@ -1,0 +1,137 @@
+---
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Ornament from '../../components/Ornament.astro';
+import { getWriteups, formatDate } from '../../lib';
+
+export async function getStaticPaths() {
+  const writeups = await getWriteups();
+  return writeups.map((entry) => ({ params: { id: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const { data } = entry;
+const { Content, headings } = await render(entry);
+const toc = headings.filter((h) => h.depth === 2);
+---
+<Base title={data.title} description={data.description} intensity="calm">
+  <article class="wrap article">
+    <!-- header -->
+    <header class="article__head">
+      <p class="eyebrow eyebrow--lily">{data.platform} · {data.os}</p>
+      <h1 class="display article__title">{data.title}</h1>
+      <p class="lede">{data.description}</p>
+      <p class="meta article__byline">
+        <time datetime={data.date.toISOString()}>{formatDate(data.date)}</time>
+        {data.retired && <span> · retired</span>}
+      </p>
+    </header>
+
+    <div class="article__grid">
+      <!-- rail: machine card + attack chain + TOC -->
+      <aside class="rail">
+        <dl class="infocard">
+          <div><dt>OS</dt><dd>{data.os}</dd></div>
+          <div><dt>Difficulty</dt><dd>{data.difficulty}</dd></div>
+          <div><dt>Platform</dt><dd>{data.platform}</dd></div>
+        </dl>
+
+        {data.chain.length > 0 && (
+          <nav class="chain" aria-label="Attack chain">
+            <p class="chain__label eyebrow">Attack chain</p>
+            <ol class="chain__steps mono" role="list">
+              {data.chain.map((step) => <li>{step}</li>)}
+            </ol>
+          </nav>
+        )}
+
+        {toc.length > 0 && (
+          <nav class="toc" aria-label="On this page">
+            <p class="toc__label eyebrow">On this page</p>
+            <ul role="list">
+              {toc.map((h) => <li><a href={`#${h.slug}`}>{h.text}</a></li>)}
+            </ul>
+          </nav>
+        )}
+      </aside>
+
+      <!-- body -->
+      <div class="prose">
+        <Content />
+      </div>
+    </div>
+
+    <Ornament />
+    <p class="article__back"><a href="/writeups/">← All writeups</a></p>
+  </article>
+</Base>
+
+<style>
+  .article { padding-block: var(--space-2xl) var(--space-xl); }
+  .article__head { max-width: var(--wrap-narrow); margin-bottom: var(--space-2xl); display: grid; gap: var(--space-s); }
+  .article__title { font-size: var(--step-5); }
+  .article__byline { margin-top: var(--space-xs); }
+
+  .article__grid {
+    display: grid;
+    grid-template-columns: 15rem minmax(0, 1fr);
+    gap: var(--space-2xl);
+    align-items: start;
+  }
+
+  /* rail */
+  .rail { position: sticky; top: var(--space-l); display: grid; gap: var(--space-l); font-size: var(--step--1); }
+
+  .infocard {
+    display: grid; gap: 0.6em;
+    padding: var(--space-m);
+    background: var(--paper-raised);
+    border: var(--hairline);
+    border-radius: var(--radius-m);
+  }
+  .infocard > div { display: flex; justify-content: space-between; gap: var(--space-s); }
+  .infocard dt { color: var(--mute); font-size: var(--step--2); text-transform: uppercase; letter-spacing: 0.06em; }
+  .infocard dd { font-weight: 600; }
+
+  .chain__steps {
+    margin-top: var(--space-xs);
+    list-style: none; padding: 0;
+    display: grid; gap: 0;
+    counter-reset: step;
+    font-size: var(--step--2);
+    color: var(--ink-soft);
+  }
+  .chain__steps li {
+    position: relative;
+    padding: 0.5em 0 0.5em 1.6em;
+    counter-increment: step;
+    border-left: 1px solid var(--rule-strong);
+    margin-left: 0.4em;
+  }
+  .chain__steps li::before {
+    content: counter(step);
+    position: absolute; left: -0.68em; top: 0.5em;
+    width: 1.25em; height: 1.25em;
+    display: grid; place-items: center;
+    font-size: 0.85em;
+    background: var(--paper); color: var(--lily);
+    border: 1px solid var(--lily); border-radius: 50%;
+  }
+  .chain__steps li:last-child { border-left-color: transparent; }
+
+  .toc__label { margin-bottom: var(--space-xs); }
+  .toc ul { list-style: none; padding: 0; display: grid; gap: 0.35em; }
+  .toc a { text-decoration: none; color: var(--ink-soft); }
+  .toc a:hover { color: var(--lily-deep); }
+
+  .article__back { margin-top: var(--space-l); }
+  .article__back a { font-family: var(--font-label); font-size: var(--step--1); letter-spacing: var(--label-tracking); text-transform: var(--label-transform); text-decoration: none; color: var(--mute); }
+  .article__back a:hover { color: var(--lily-deep); }
+
+  @media (max-width: 52rem) {
+    .article__grid { grid-template-columns: 1fr; gap: var(--space-xl); }
+    .rail { position: static; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); }
+  }
+</style>
+EOF
+sed -n '1,3p' src/pages/writeups/\[...id\].astro && echo "article template written"

@@ -1,0 +1,296 @@
+---
+import Lily from './Lily.astro';
+
+const nav = [
+  { href: '/writeups/', label: 'Writeups' },
+  { href: '/notes/', label: 'Notes' },
+  { href: '/about/', label: 'About' },
+];
+const path = Astro.url.pathname;
+const isCurrent = (href: string) => path === href || path.startsWith(href);
+---
+<header class="site-header wrap">
+  <a class="wordmark" href="/" aria-label="penguin — home">
+    <Lily variant="petal" class="wordmark__petal" />
+    <span class="wordmark__name">penguin</span>
+  </a>
+
+  <nav class="site-nav" aria-label="Primary">
+    <ul role="list">
+      {nav.map((item) => (
+        <li>
+          <a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>{item.label}</a>
+        </li>
+      ))}
+      <li>
+        <button type="button" class="theme-toggle" data-theme-toggle aria-label="Toggle dark mode" title="Toggle theme">
+          <svg class="theme-toggle__sun" viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><circle cx="10" cy="10" r="4" fill="none" stroke="currentColor" stroke-width="1.4"/><g stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M10 1.5v2.2M10 16.3v2.2M1.5 10h2.2M16.3 10h2.2M4 4l1.6 1.6M14.4 14.4 16 16M16 4l-1.6 1.6M5.6 14.4 4 16"/></g></svg>
+          <svg class="theme-toggle__moon" viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M16 12.3A6.5 6.5 0 0 1 7.7 4a6.5 6.5 0 1 0 8.3 8.3Z" fill="currentColor"/></svg>
+        </button>
+      </li>
+      <li>
+        <a href="/search/" class="site-nav__search" aria-current={isCurrent('/search/') ? 'page' : undefined}>
+          <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="m10.4 10.4 3.4 3.4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+          <span>Search</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+</header>
+
+<script>
+  // Theme toggle. Reduced motion → plain cross-fade. Otherwise a cinematic wind
+  // gust sweeps across the viewport carrying a petal burst, and the colour change
+  // happens in its wake (light→dark blows from the left; dark→light from the right).
+  //
+  // The whole gust is driven by CSS animations (transform/opacity only), so it
+  // runs on the COMPOSITOR thread. The theme flip itself forces an unavoidable
+  // ~265ms style recalc of the ~55k-element flower carpet on the MAIN thread —
+  // but because the motion lives on the compositor, it glides straight through
+  // that hitch instead of freezing with it. (An earlier GSAP version drove the
+  // transforms via main-thread rAF, so the recalc froze the petals visibly.)
+  const root = document.documentElement;
+  const media = matchMedia('(prefers-color-scheme: dark)');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+  const current = () => root.getAttribute('data-theme') || (media.matches ? 'dark' : 'light');
+  const buttons = [...document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]')];
+  let busy = false;
+
+  const rand = (a: number, b: number) => a + Math.random() * (b - a);
+  const petalColor = (theme: string, red: boolean) =>
+    red ? (theme === 'dark' ? '#e5565a' : '#c1272d') : theme === 'dark' ? '#efe7e3' : '#d9b7b6';
+
+  // lily-petal silhouettes: narrow, tapered, pointed both ends, with a slight
+  // bend — the same language as the field petals. Pre-parsed once, cloned per petal.
+  const petalPaths = [
+    'M1 7 Q 20 -1 39 4 Q 22 9 1 7 Z',
+    'M2 5 Q 20 0 38 8 Q 20 12 2 5 Z',
+    'M1 6 Q 20 2.5 39 6 Q 20 9.5 1 6 Z',
+  ];
+  const petalTemplates = petalPaths.map((d) => {
+    const el = document.createElement('div');
+    el.className = 'gust-petal';
+    el.innerHTML = `<svg viewBox="0 0 40 12" width="100%" height="100%" preserveAspectRatio="none" aria-hidden="true"><path d="${d}" fill="currentColor"/></svg>`;
+    return el;
+  });
+
+  const persist = (t: string) => { try { localStorage.setItem('theme', t); } catch (e) {} };
+
+  function plainSwap(next: string) {
+    root.classList.add('theme-anim');
+    root.setAttribute('data-theme', next);
+    persist(next);
+    window.setTimeout(() => root.classList.remove('theme-anim'), 450);
+  }
+
+  function gustSwap(next: string) {
+    const from = current();
+    busy = true;
+    buttons.forEach((b) => { b.disabled = true; b.classList.add('gust-spin'); b.style.setProperty('--spin', `${(next === 'dark' ? 1 : -1) * 180}deg`); });
+    const dir = next === 'dark' ? 1 : -1;               // 1 = left→right, -1 = right→left
+    const vw = window.innerWidth, vh = window.innerHeight;
+    const small = window.matchMedia('(max-width: 34rem)').matches;
+
+    // Petals-only overlay — no wipe, no band, no tinted veil. The theme flip is
+    // hidden purely by the petal burst's own density at peak flight (see below).
+    const gust = document.createElement('div');
+    gust.className = 'gust';
+
+    // Lily-petal burst. Each petal is a CSS-animated layer: start just off the
+    // leading edge, stream across tumbling, fade out past the far edge. All the
+    // motion is transform+opacity → composited. A tiny separate colour animation
+    // re-tints it in the wave (a cheap per-petal repaint, not blocking the glide).
+    const N = small ? 60 : 135;    // gust burst: 135 desktop / 60 phone
+    const lead = dir > 0 ? -70 : vw + 70;
+    const frag = document.createDocumentFragment();
+    let maxEnd = 0;
+    for (let i = 0; i < N; i++) {
+      const el = petalTemplates[i % petalTemplates.length].cloneNode(true) as HTMLElement;
+      const red = Math.random() < 0.55;
+      const w = rand(16, small ? 30 : 46);
+      const sy = rand(-0.05, 1) * vh;
+      const r0 = rand(-40, 40);
+      const dur = rand(0.5, 0.8);
+      // wave: launch from the leading edge outward (reversed when blowing right→left)
+      const ord = dir > 0 ? i : N - 1 - i;
+      const delay = (ord / N) * 0.22 + rand(0, 0.05);
+      maxEnd = Math.max(maxEnd, delay + dur);
+      const s = el.style;
+      s.color = petalColor(from, red);
+      s.width = `${w}px`; s.height = `${w * 0.32}px`;
+      s.setProperty('--sx', `${lead}px`);
+      s.setProperty('--sy', `${sy}px`);
+      s.setProperty('--ex', `${dir > 0 ? vw + 90 : -90}px`);
+      s.setProperty('--ey', `${sy + rand(-90, 90)}px`);
+      s.setProperty('--r0', `${r0}deg`);
+      s.setProperty('--r1', `${r0 + rand(-420, 520)}deg`);
+      s.setProperty('--op', `${rand(0.6, 0.82)}`);
+      s.setProperty('--dur', `${dur}s`);
+      s.setProperty('--delay', `${delay}s`);
+      s.setProperty('--c1', petalColor(next, red));
+      frag.appendChild(el);
+    }
+    gust.appendChild(frag);
+    document.body.appendChild(gust);   // one insert → the CSS animations start together
+
+    // Flip the theme at PEAK petal density (~440ms): enough petals are mid-flight
+    // across the viewport to cover the swap at a glance. This is the ONE heavy
+    // step — a single ~213ms style recalc of the ~55k-element carpet — but the
+    // petals are composited, so they glide over it instead of freezing. We
+    // deliberately do NOT add `.theme-anim` (a second tree invalidation) and the
+    // UI simply snaps under the burst. (`.theme-anim` stays for the plain swap.)
+    window.setTimeout(() => {
+      root.setAttribute('data-theme', next);
+      persist(next);
+    }, 440);
+
+    // Tear down once the last petal has drifted off and faded.
+    const total = Math.max(maxEnd, 0.95) * 1000 + 180;
+    window.setTimeout(() => {
+      gust.remove();
+      buttons.forEach((b) => { b.disabled = false; b.classList.remove('gust-spin'); });
+      busy = false;
+    }, total);
+  }
+
+  buttons.forEach((btn) =>
+    btn.addEventListener('click', () => {
+      if (busy) return; // spam-proof: one transition at a time
+      const next = current() === 'dark' ? 'light' : 'dark';
+      if (reduce.matches) plainSwap(next);
+      else gustSwap(next);
+    }),
+  );
+</script>
+
+<style is:global>
+  /* The wind-gust transition layer (created on <body> at runtime, so global).
+     Sits below the nav (z 20) and above the page content. */
+  .gust { position: fixed; inset: 0; z-index: 15; pointer-events: none; overflow: clip; }
+
+  /* Each petal: a composited transform+opacity glide, plus a cheap colour
+     re-tint in the wave. Trajectory/timing come from per-petal custom props. */
+  .gust-petal {
+    position: absolute; top: 0; left: 0; line-height: 0;
+    opacity: 0; will-change: transform, opacity;
+    transform: translate3d(var(--sx, 0), var(--sy, 0), 0) rotate(var(--r0, 0deg));
+    animation:
+      gust-fly var(--dur, 0.7s) cubic-bezier(0.5, 0.05, 0.7, 0.2) var(--delay, 0s) both,
+      gust-tint 0.22s linear calc(var(--delay, 0s) + 0.1s) forwards;
+  }
+  .gust-petal svg { display: block; width: 100%; height: 100%; overflow: visible; }
+  @keyframes gust-fly {
+    0%   { opacity: 0;              transform: translate3d(var(--sx), var(--sy), 0) rotate(var(--r0)); }
+    12%  { opacity: var(--op, 0.75); }
+    78%  { opacity: var(--op, 0.75); }
+    100% { opacity: 0;              transform: translate3d(var(--ex), var(--ey), 0) rotate(var(--r1)); }
+  }
+  @keyframes gust-tint { to { color: var(--c1); } }
+
+  /* the toggle icon gives a quick acknowledging spin */
+  .theme-toggle.gust-spin svg { animation: gust-icon 0.34s ease-in-out; }
+  @keyframes gust-icon { 50% { transform: rotate(var(--spin, 180deg)) scale(0.72); } }
+
+  @media (prefers-reduced-motion: reduce) { .gust { display: none; } }
+</style>
+
+<style>
+  .site-header {
+    /* transparent overlay so the hero/sky bleed uninterrupted to the top edge */
+    position: absolute;
+    top: 0; left: 50%; transform: translateX(-50%);
+    z-index: 20;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-xs) var(--space-l);
+    padding-block: var(--space-l);
+    background: transparent;
+  }
+
+  .wordmark {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    text-decoration: none;
+    color: var(--ink);
+  }
+  .wordmark__name {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: var(--step-2);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    line-height: 1;
+  }
+  .wordmark :global(.wordmark__petal) {
+    width: 0.8rem;
+    transform: rotate(-24deg) translateY(-0.1rem);
+    transition: transform var(--dur-3) var(--ease-bloom);
+  }
+  .wordmark:hover { color: var(--ink); }
+  .wordmark:hover :global(.wordmark__petal) { transform: rotate(-4deg) translateY(-0.15rem); }
+
+  .site-nav ul {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2xs) var(--space-l);
+    padding: 0;
+    list-style: none;
+  }
+
+  /* theme toggle */
+  .theme-toggle {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 1.9rem; height: 1.9rem; padding: 0;
+    background: none; border: 1px solid var(--rule-strong); border-radius: var(--radius-pill);
+    color: var(--ink-soft);
+    transition: color var(--dur-1) var(--ease-soft), border-color var(--dur-1) var(--ease-soft);
+  }
+  .theme-toggle:hover { color: var(--lily-deep); border-color: var(--lily); }
+  .theme-toggle__sun { display: none; }
+  .theme-toggle__moon { display: block; }
+  :global(:root[data-theme='dark']) .theme-toggle__sun { display: block; }
+  :global(:root[data-theme='dark']) .theme-toggle__moon { display: none; }
+  @media (prefers-color-scheme: dark) {
+    :global(:root:not([data-theme='light'])) .theme-toggle__sun { display: block; }
+    :global(:root:not([data-theme='light'])) .theme-toggle__moon { display: none; }
+  }
+  .site-nav a {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    padding-block: var(--space-2xs);
+    font-family: var(--font-label);
+    font-size: var(--step--1);
+    letter-spacing: var(--label-tracking);
+    text-transform: var(--label-transform);
+    color: var(--ink-soft);
+    text-decoration: none;
+  }
+  /* current page: a thin crimson stem grows under the label */
+  .site-nav a::after {
+    content: '';
+    position: absolute;
+    left: 0; right: var(--label-tracking); bottom: 0;
+    height: 1px;
+    background: var(--lily);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--dur-2) var(--ease-bloom);
+  }
+  .site-nav a:hover { color: var(--lily-deep); }
+  .site-nav a:hover::after { transform: scaleX(0.4); }
+  .site-nav a[aria-current='page'] { color: var(--ink); }
+  .site-nav a[aria-current='page']::after { transform: scaleX(1); }
+
+  @media (max-width: 34rem) {
+    .site-header { flex-direction: column; align-items: flex-start; gap: var(--space-s); }
+    .site-nav { width: 100%; }               /* full width so the ul can wrap */
+    .site-nav ul { gap: var(--space-xs) var(--space-m); }
+    .site-nav a { letter-spacing: 0.08em; }  /* tighter tracking → fits a phone row */
+  }
+</style>

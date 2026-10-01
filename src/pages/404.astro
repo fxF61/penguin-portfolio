@@ -1,0 +1,21 @@
+---
+import Base from '../layouts/Base.astro';
+import Lily from '../components/Lily.astro';
+---
+<Base title="Lost" intensity="atmosphere">
+  <section class="wrap notfound">
+    <Lily variant="petal" tone="fill" class="notfound__petal" />
+    <p class="eyebrow eyebrow--lily">404 · aftermath</p>
+    <h1 class="display notfound__title">Nothing blooms here.</h1>
+    <p class="lede">The page fell away. What's left is on the other pages.</p>
+    <p><a class="notfound__home" href="/">← Back to the beginning</a></p>
+  </section>
+</Base>
+
+<style>
+  .notfound { min-height: 60svh; display: grid; place-content: center; text-align: center; gap: var(--space-m); padding-block: var(--space-3xl); }
+  .notfound :global(.notfound__petal) { width: 4rem; margin-inline: auto; transform: rotate(-18deg); }
+  .notfound__title { font-size: var(--step-5); }
+  .notfound__home { font-family: var(--font-label); font-size: var(--step--1); letter-spacing: var(--label-tracking); text-transform: var(--label-transform); text-decoration: none; color: var(--mute); }
+  .notfound__home:hover { color: var(--lily-deep); }
+</style>

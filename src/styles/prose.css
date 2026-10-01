@@ -1,0 +1,75 @@
+/* ==========================================================================
+   Prose — the reading surface for writeups & notes (intensity: calm).
+   Reading first: generous measure, quiet rhythm, no ambient motion.
+   ========================================================================== */
+
+.prose {
+  --stack-space: var(--space-l);
+  max-width: var(--measure);
+  font-size: var(--step-0);
+}
+.prose > * + * { margin-block-start: 1.1em; }
+.prose > * + :is(h2, h3) { margin-block-start: 1.9em; }
+
+.prose :is(h2, h3, h4) { scroll-margin-top: var(--space-2xl); position: relative; }
+.prose h2 { font-size: var(--step-3); }
+.prose h3 { font-size: var(--step-2); }
+.prose h4 { font-size: var(--step-1); }
+
+/* heading anchors — a small crimson bud appears in the margin on hover */
+.prose :is(h2, h3) > a.anchor {
+  position: absolute; left: -1.1em; top: 0.1em;
+  color: var(--rose); text-decoration: none;
+  opacity: 0; transition: opacity var(--dur-1);
+}
+.prose :is(h2, h3):hover > a.anchor,
+.prose :is(h2, h3) > a.anchor:focus-visible { opacity: 1; color: var(--lily); }
+
+.prose p { line-height: var(--leading-body); }
+.prose strong { font-weight: 600; }
+.prose em { color: inherit; }
+.prose a { color: var(--lily-deep); text-decoration-color: color-mix(in srgb, var(--lily) 45%, transparent); }
+
+.prose :is(ul, ol) { padding-left: 1.3em; display: grid; gap: 0.4em; }
+.prose li::marker { color: var(--lily); }
+.prose ul { list-style: none; padding-left: 1.4em; }
+.prose ul > li { position: relative; }
+.prose ul > li::before {
+  content: ''; position: absolute; left: -1.1em; top: 0.62em;
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--rose); box-shadow: inset 0 0 0 1px var(--lily);
+}
+
+.prose blockquote {
+  margin-inline: 0; padding: var(--space-xs) var(--space-l);
+  border-left: 2px solid var(--rose);
+  color: var(--ink-soft); font-style: italic;
+  font-family: var(--font-display); font-size: var(--step-1);
+}
+
+.prose img { border-radius: var(--radius-s); border: var(--hairline); }
+
+/* tables — recon output, port lists */
+.prose table { width: 100%; border-collapse: collapse; font-size: var(--step--1); }
+.prose th, .prose td { text-align: left; padding: 0.5em 0.8em; border-bottom: var(--hairline); }
+.prose thead th { color: var(--mute); font-weight: 600; font-family: var(--font-label); font-size: var(--step--2); letter-spacing: 0.06em; text-transform: uppercase; }
+.prose tbody tr:hover { background: var(--blush); }
+
+/* callouts — GitHub-style [!note] / [!warning] / [!loot] blockquotes,
+   transformed by the remark plugin (rehype step, Phase 2). */
+.callout {
+  display: grid; gap: 0.3em;
+  padding: var(--space-m) var(--space-l);
+  border-radius: var(--radius-s);
+  border-left: 3px solid var(--c, var(--lily));
+  background: color-mix(in srgb, var(--c, var(--lily)) 7%, var(--paper));
+  font-style: normal; font-family: var(--font-body);
+}
+.callout__label {
+  font-family: var(--font-label); font-size: var(--step--2);
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--c, var(--lily));
+  display: flex; align-items: center; gap: 0.5em;
+}
+.callout--note { --c: var(--lily); }
+.callout--warning { --c: #9a3b17; }
+.callout--loot { --c: var(--stem); }

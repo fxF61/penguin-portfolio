@@ -1,0 +1,113 @@
+---
+import Base from '../layouts/Base.astro';
+import Lily from '../components/Lily.astro';
+import Ornament from '../components/Ornament.astro';
+
+const skills = {
+  'Active Directory': ['Kerberos abuse', 'AD CS / ESC paths', 'BloodHound', 'ACL abuse', 'DCSync'],
+  'Tradecraft': ['Enumeration', 'Privilege escalation', 'Lateral movement', 'Pivoting'],
+  'Tooling': ['Impacket', 'NetExec', 'Certipy', 'Ligolo-ng', 'Sliver'],
+  'Foundations': ['Linux', 'Windows internals', 'Networking', 'Python', 'PowerShell'],
+};
+const path = [
+  { when: 'Now', what: 'Third-year Computer Science — security focus' },
+  { when: 'Ongoing', what: 'Hack The Box · retired machines & Pro Labs' },
+  { when: 'Next', what: 'OSCP-track preparation' },
+];
+---
+<Base title="About" intensity="atmosphere">
+  <section class="wrap about">
+    <div class="about__intro">
+      <p class="eyebrow eyebrow--lily">彼岸花 · the other shore</p>
+      <h1 class="display about__title">I'm <em>penguin</em>.</h1>
+      <div class="about__body">
+        <p class="lede">
+          Third-year CS student, cybersecurity focus. I spend my time inside
+          Windows domains — Active Directory, Kerberos, certificate services —
+          and write up what holds and what gives way.
+        </p>
+        <p>
+          The spider lily blooms after everything else has gone; it marks the
+          aftermath. That's the register I write in: not the thrill of the break,
+          but the quiet reconstruction of how it happened, so the next person can
+          follow it. Everything here concerns retired machines and lab
+          environments.
+        </p>
+        <p class="meta">Elsewhere as <span class="mono">fxF61</span>.</p>
+      </div>
+    </div>
+    <div class="about__art" aria-hidden="true">
+      <Lily variant="bloom-1" tone="line" class="about__lily" />
+    </div>
+  </section>
+
+  <Ornament />
+
+  <section class="wrap about-cols">
+    <div class="skills">
+      <h2 class="display">What I work with</h2>
+      <dl class="skills__grid">
+        {Object.entries(skills).map(([group, items]) => (
+          <div class="skills__group">
+            <dt class="eyebrow">{group}</dt>
+            <dd>
+              <ul class="skills__list mono" role="list">
+                {items.map((s) => <li>{s}</li>)}
+              </ul>
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+
+    <div class="path">
+      <h2 class="display">Where I am</h2>
+      <ol class="path__list" role="list">
+        {path.map((p) => (
+          <li class="path__row">
+            <span class="path__when eyebrow">{p.when}</span>
+            <span class="path__what">{p.what}</span>
+          </li>
+        ))}
+      </ol>
+      <div class="contact">
+        <p class="eyebrow">Contact</p>
+        <ul class="contact__links mono" role="list">
+          <li><a href="https://github.com/fxf61" rel="me noopener">github.com/fxF61</a></li>
+          <li><a href="#">Hack The Box — fxF61</a></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .about { display: grid; grid-template-columns: 1.4fr 0.6fr; gap: var(--space-2xl); align-items: center; padding-block: var(--space-3xl) var(--space-xl); }
+  .about__title { font-size: var(--step-5); margin-block: var(--space-xs) var(--space-l); }
+  .about__body { display: grid; gap: var(--space-m); max-width: 54ch; color: var(--ink-soft); }
+  .about__art { display: grid; place-items: center; }
+  .about__art :global(.about__lily) { width: min(100%, 18rem); }
+
+  .about-cols { display: grid; grid-template-columns: 1.3fr 1fr; gap: var(--space-2xl); align-items: start; }
+  .about-cols h2 { font-size: var(--step-2); margin-bottom: var(--space-l); }
+
+  .skills__grid { display: grid; gap: var(--space-l); grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); }
+  .skills__group dt { margin-bottom: var(--space-xs); }
+  .skills__list { list-style: none; padding: 0; display: grid; gap: 0.3em; font-size: var(--step--1); color: var(--ink-soft); }
+  .skills__list li { position: relative; padding-left: 1em; }
+  .skills__list li::before { content: '·'; position: absolute; left: 0; color: var(--lily); }
+
+  .path__list { list-style: none; padding: 0; display: grid; gap: 0; margin-bottom: var(--space-xl); }
+  .path__row { display: grid; grid-template-columns: 5rem 1fr; gap: var(--space-m); padding-block: var(--space-s); border-top: var(--hairline); align-items: baseline; }
+  .path__row:last-child { border-bottom: var(--hairline); }
+  .path__what { font-family: var(--font-display); font-size: var(--step-1); }
+
+  .contact__links { list-style: none; padding: 0; display: grid; gap: 0.4em; font-size: var(--step--1); margin-top: var(--space-xs); }
+
+  @media (max-width: 52rem) {
+    .about { grid-template-columns: 1fr; }
+    .about__art { order: -1; }
+    .about__art :global(.about__lily) { width: min(60%, 12rem); }
+    .about-cols { grid-template-columns: 1fr; gap: var(--space-xl); }
+  }
+</style>

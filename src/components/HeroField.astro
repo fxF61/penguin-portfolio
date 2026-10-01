@@ -1,0 +1,472 @@
+---
+// Layered higanbana hero — camera looking up into the field (refs:
+// references/redlily.jpg + 40fa6e1…jpg).
+//
+//   • Sky (top ~35%): empty rose→bone; the hero text lives here, masked clear.
+//   • Tall lilies rising into the sky: sparse, some red / some white, they sway.
+//   • Field (bottom ~65%), three baked static planes back→front:
+//       back  — hazy pale heads (blurred, faint)
+//       mid   — red + pale mix
+//       white — pale "bones" sitting behind the red foreground
+//     …then the RED FOREGROUND on top, the only animated field layer.
+//
+// Transformation = wind revealing the white bones, not recolouring. A gust
+// rolls right→left; each foreground red flower it reaches bends, thins (fades)
+// and pulses toward camera, uncovering the baked white behind — then red blooms
+// back in its wake. Loops. Red + white petals rise upward-diagonally into the sky.
+//
+// Every flower is the same generator umbel (scripts/draw-lily.mjs), baked as
+// <use> so only ~18 instances animate. Motion is transform/opacity. Decorative
+// (aria-hidden). prefers-reduced-motion → static rest (red field, white between).
+import Lily from './Lily.astro';
+
+const petalSrc = (await import('../assets/lilies/petal.svg?raw')).default;
+const strip = (s: string) => s.replace(/^<svg[^>]*>/, '').replace(/<\/svg>\s*$/, '');
+const syms: Record<string, string> = {
+  'head-p-a': strip((await import('../assets/lilies/head-p-a.svg?raw')).default),
+  'head-p-b': strip((await import('../assets/lilies/head-p-b.svg?raw')).default),
+  'head-p-c': strip((await import('../assets/lilies/head-p-c.svg?raw')).default),
+  'head-d-a': strip((await import('../assets/lilies/head-d-a.svg?raw')).default),
+  'head-d-b': strip((await import('../assets/lilies/head-d-b.svg?raw')).default),
+  'head-d-c': strip((await import('../assets/lilies/head-d-c.svg?raw')).default),
+  'head-w-a': strip((await import('../assets/lilies/head-w-a.svg?raw')).default),
+  'head-w-b': strip((await import('../assets/lilies/head-w-b.svg?raw')).default),
+  'head-w-c': strip((await import('../assets/lilies/head-w-c.svg?raw')).default),
+};
+
+// deterministic PRNG so server + client scatter match
+const mulberry = (seed: number) => () => {
+  seed |= 0; seed = (seed + 0x6d2b79f5) | 0;
+  let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+  t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+};
+const R = mulberry(526);
+const rr = (a: number, b: number) => a + R() * (b - a);
+const redIds = ['head-p-a', 'head-p-b', 'head-p-c'];   // primary tier (flp)
+const deepIds = ['head-d-a', 'head-d-b', 'head-d-c'];  // deep tier (fld)
+const paleIds = ['head-w-a', 'head-w-b', 'head-w-c'];  // pale/bone tier (flw)
+const anyId = (pool: string[]) => pool[Math.floor(R() * pool.length)];
+const place = (x: number, y: number, s: number, r: number) =>
+  `translate(${x.toFixed(1)} ${y.toFixed(1)}) scale(${s.toFixed(3)}) rotate(${r.toFixed(1)})`;
+// slim stem from a flower's base (x,y) rooting DOWN to the ground line, so it
+// always disappears into the mass below — never dangles in empty space
+const GROUND = 540;
+const stemPath = (x: number, y: number, sway: number) => {
+  const len = GROUND - y;
+  return `M${x.toFixed(1)} ${y.toFixed(1)} C ${(x + sway * 0.4).toFixed(1)} ${(y + len * 0.4).toFixed(1)} ${(x + sway).toFixed(1)} ${(y + len * 0.7).toFixed(1)} ${(x + sway * 1.2).toFixed(1)} ${GROUND}`;
+};
+
+type P = { id: string; x: number; y: number; s: number; r: number; o: number; bl: number };
+// Dense scatter: y grows down; deeper (higher y) = nearer = larger. Bottom bias
+// packs the mass low. Small minDX lets heads overlap into a mass, not a grid.
+const scatter = (n: number, pool: string[], y0: number, y1: number, s0: number, s1: number, o0: number, o1: number, bl: number, minDX = 46): P[] => {
+  const out: P[] = [];
+  let g = 0;
+  while (out.length < n && g++ < n * 60) {
+    const x = rr(-60, 1060);
+    const y = y0 + (y1 - y0) * Math.pow(R(), 0.7); // bias toward the bottom
+    if (out.some((p) => Math.abs(p.x - x) < minDX && Math.abs(p.y - y) < 30)) continue;
+    const t = (y - y0) / (y1 - y0);
+    out.push({ id: anyId(pool), x, y, s: rr(s0, s1) * (0.85 + t * 0.35), r: rr(-24, 24), o: rr(o0, o1), bl: bl * (1 - t) });
+  }
+  return out.sort((a, b) => a.y - b.y); // paint back→front
+};
+
+// viewBox 1000×560, y down. Layers back→front:
+//  under  — dense pale bones (hazy small at top → larger at bottom), the reveal
+//  mass   — dense red field (static) for density
+//  bones  — a pale directly behind each animated front flower
+//  fore   — large front red heads that bend/fade to uncover their bone
+// All flowers stay within y≤535 (viewBox 545) so their bases are fully visible,
+// never clipped by the bottom edge.
+// pale bones: subtle, smaller/fainter than the red so red stays dominant
+const underGen = scatter(30, paleIds, 60, 530, 0.16, 0.42, 0.4, 0.72, 1.4, 34);
+// dense red field, packed low, edge to edge
+const mass = scatter(48, redIds, 175, 535, 0.24, 0.5, 0.9, 1, 0.2, 30);
+// pull the mass UP on both sides — SYMMETRIC: same count/params per side
+const rightFill = scatter(13, redIds, 250, 515, 0.26, 0.48, 0.9, 1, 0.15, 36).map((p) => ({ ...p, x: rr(630, 1060) }));
+const leftFill = scatter(13, redIds, 250, 515, 0.26, 0.48, 0.9, 1, 0.15, 36).map((p) => ({ ...p, x: rr(-60, 430) }));
+// transitional risers: stemmed flowers rising above the mass, thinning into sky.
+// spread across BOTH sides so neither sky is empty.
+const risers = scatter(20, [...redIds, ...deepIds], 150, 350, 0.22, 0.4, 0.85, 1, 0.15, 44)
+  .map((p, i) => ({ ...p, x: i % 3 === 0 ? rr(-60, 430) : i % 3 === 1 ? rr(560, 1060) : p.x, sway: rr(-16, 16) }));
+// darkest, most-saturated flowers sit at the very front
+const bottomRow = scatter(14, deepIds, 485, 535, 0.44, 0.62, 1, 1, 0, 40);
+const fore = scatter(11, deepIds, 430, 535, 0.46, 0.64, 1, 1, 0, 96);
+const bones: P[] = fore.map((f) => ({ id: anyId(paleIds), x: f.x + rr(-22, 22), y: f.y - rr(2, 22), s: f.s * rr(0.82, 1.0), r: rr(-24, 24), o: 0.92, bl: 0 }));
+
+// stems, 1:1 with a flower head, rooting into the ground line.
+const stems: string[] = [
+  ...risers.map((p) => stemPath(p.x, p.y + 3, p.sway)),
+  ...mass.filter((p) => p.y < 480).map((p) => stemPath(p.x, p.y + 3, rr(-14, 14))),
+  ...rightFill.filter((p) => p.y < 480).map((p) => stemPath(p.x, p.y + 3, rr(-14, 14))),
+  ...leftFill.filter((p) => p.y < 480).map((p) => stemPath(p.x, p.y + 3, rr(-14, 14))),
+];
+// stems for the FRONT flowers + the dense bottom clump (mass/fills at y≥480).
+// In light the dense red clump hides them, so these are dark-mode-only
+// (transparent in light) — light stays untouched while EVERY visible white
+// bloom in the field gets a thread stem into the ground.
+const frontStems: string[] = [
+  ...fore, ...bottomRow,
+  ...mass.filter((p) => p.y >= 480),
+  ...rightFill.filter((p) => p.y >= 480),
+  ...leftFill.filter((p) => p.y >= 480),
+].map((p) => stemPath(p.x, p.y + 3, rr(-12, 12)));
+
+const useTag = (p: P) =>
+  `<use href="#${p.id}" transform="${place(p.x, p.y, p.s, p.r)}"${p.o < 1 ? ` opacity="${p.o.toFixed(2)}"` : ''}${p.bl > 0.05 ? ` style="filter:blur(${p.bl.toFixed(1)}px)"` : ''}/>`;
+// a few background pales get a slow opacity shimmer
+const underTag = (p: P, i: number) =>
+  `<use href="#${p.id}" transform="${place(p.x, p.y, p.s, p.r)}" opacity="${p.o.toFixed(2)}"${i % 4 === 0 ? ` class="hf-shimmer" style="--o:${p.o.toFixed(2)};--sd:${(4.5 + (i % 5) * 0.7).toFixed(1)}s;--dl:-${(i % 6).toFixed(1)}s${p.bl > 0.05 ? `;filter:blur(${p.bl.toFixed(1)}px)` : ''}"` : p.bl > 0.05 ? ` style="filter:blur(${p.bl.toFixed(1)}px)"` : ''}/>`;
+// per-flower gentle-breeze sway: placement on the wrapper, sway on the inner use
+const swayVars = () => `--amp:${rr(0.7, 1.9).toFixed(2)};--sd:${rr(4.4, 7.8).toFixed(1)}s;--dl:-${rr(0, 8).toFixed(1)}s`;
+const swayTag = (p: P) =>
+  `<g transform="${place(p.x, p.y, p.s, p.r)}"${p.o < 1 ? ` opacity="${p.o.toFixed(2)}"` : ''}${p.bl > 0.05 ? ` style="filter:blur(${p.bl.toFixed(1)}px)"` : ''}><use href="#${p.id}" class="sway" style="${swayVars()}"/></g>`;
+const foreTag = (p: P) =>
+  `<g transform="${place(p.x, p.y, p.s, p.r)}"><use href="#${p.id}" class="sway" style="${swayVars()}"/></g>`;
+
+// the dense mass sways as a few interleaved groups (cheap: whole-group drift)
+// rather than per-flower, so the field breathes without hundreds of animations
+const massAll = [...mass, ...rightFill, ...leftFill, ...bottomRow];
+const SWAY_GROUPS = 6;
+const massGroups = Array.from({ length: SWAY_GROUPS }, (_, g) => ({
+  items: massAll.filter((_, i) => i % SWAY_GROUPS === g),
+  amp: rr(2, 4).toFixed(2),
+  sd: rr(5.5, 9).toFixed(1),
+  dl: rr(0, 9).toFixed(1),
+}));
+
+// tall lilies rising into the sky — some red, some white; they only sway.
+// staggered down the right edge to fill the diagonal gap.
+type F = { variant: 'bloom-1' | 'bloom-2' | 'bloom-3'; x: number; y: number; w: number; depth: number; red: boolean; flip?: boolean };
+// ~30-35% shorter than before so they rise above the mass but don't tower.
+// x is % within each side's stage (right stage / left stage).
+// SYMMETRIC: 5 per side. The right five still flank the moon.
+const tallRight: F[] = [
+  { variant: 'bloom-1', x: 61, y: 20, w: 12, depth: 0,    red: true },
+  { variant: 'bloom-2', x: 90, y: 24, w: 10, depth: 0.12, red: true, flip: true },
+  { variant: 'bloom-3', x: 41, y: 30, w: 9,  depth: 0.28, red: true },
+  { variant: 'bloom-2', x: 74, y: 38, w: 8,  depth: 0.44, red: true },
+  { variant: 'bloom-3', x: 52, y: 49, w: 6,  depth: 0.8,  red: true },
+];
+// left side — organic, fewer, mostly behind the text column (masked around it)
+const tallLeft: F[] = [
+  { variant: 'bloom-2', x: 8,  y: 28, w: 10, depth: 0.14, red: true },
+  { variant: 'bloom-1', x: 30, y: 34, w: 9,  depth: 0.3,  red: true, flip: true },
+  { variant: 'bloom-3', x: 55, y: 30, w: 9,  depth: 0.24, red: false },
+  { variant: 'bloom-1', x: 44, y: 46, w: 7,  depth: 0.6,  red: true },
+  { variant: 'bloom-2', x: 18, y: 42, w: 7,  depth: 0.7,  red: true, flip: true },
+];
+---
+<div class="herofield" aria-hidden="true" data-herofield>
+  <!-- sky: clean static blood moon -->
+  <div class="hf__sky">
+    <div class="hf__moon"></div>
+  </div>
+
+  <svg class="hf__carpet" viewBox="0 0 1000 545" preserveAspectRatio="xMidYMax slice">
+    <defs set:html={Object.entries(syms).map(([id, inner]) => `<g id="${id}">${inner}</g>`).join('')} />
+    <g class="hf__stems" set:html={stems.map((d) => `<path d="${d}"/>`).join('')} />
+    <g class="hf__stems hf__stems--front" set:html={frontStems.map((d) => `<path d="${d}"/>`).join('')} />
+    <g class="hf__under" set:html={underGen.map(underTag).join('')} />
+    <g class="hf__risers" set:html={risers.map(swayTag).join('')} />
+    {massGroups.map((grp) => (
+      <g class="sway-grp" style={`--amp:${grp.amp};--sd:${grp.sd}s;--dl:-${grp.dl}s`} set:html={grp.items.map(useTag).join('')} />
+    ))}
+    <g class="hf__bones" set:html={bones.map(useTag).join('')} />
+    <g class="hf__fore" set:html={fore.map(foreTag).join('')} />
+  </svg>
+
+  <!-- faint moonlight catching the top of the field -->
+  <div class="hf__moonlight"></div>
+
+  <div class="hf__stage hf__stage--left">
+    {tallLeft.map((f) => (
+      <div class:list={['ffl', f.red && 'is-red']} style={`--x:${f.x}%; --y:${f.y}%; --w:${f.w}rem; --depth:${f.depth}; --amp:${(0.9 + f.depth).toFixed(2)}; --sd:${(4.6 + f.x % 7 * 0.5).toFixed(1)}s; --dl:-${(f.x % 9).toFixed(1)}s; ${f.flip ? '--flip:-1;' : ''}`}>
+        <Lily variant={f.variant} tone="field" />
+      </div>
+    ))}
+  </div>
+
+  <div class="hf__stage">
+    {tallRight.map((f) => (
+      <div class:list={['ffl', f.red && 'is-red']} style={`--x:${f.x}%; --y:${f.y}%; --w:${f.w}rem; --depth:${f.depth}; --amp:${(0.9 + f.depth).toFixed(2)}; --sd:${(4.6 + f.x % 7 * 0.5).toFixed(1)}s; --dl:-${(f.x % 9).toFixed(1)}s; ${f.flip ? '--flip:-1;' : ''}`}>
+        <Lily variant={f.variant} tone="field" />
+      </div>
+    ))}
+  </div>
+
+  <div class="hf__petals" data-petals></div>
+  <template data-petal-src set:html={petalSrc}></template>
+</div>
+
+<script>
+  type Cleanup = () => void;
+  const rand = (a: number, b: number) => a + Math.random() * (b - a);
+
+  function initField(root: HTMLElement): Cleanup {
+    const petalLayer = root.querySelector<HTMLElement>('.hf__petals')!;
+    const petalSrc = root.querySelector<HTMLTemplateElement>('[data-petal-src]')!.innerHTML;
+    const lede = root.parentElement?.querySelector<HTMLElement>('.hero__lede') ?? null;
+
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+    const small = matchMedia('(max-width: 52rem)');
+    const phone = matchMedia('(max-width: 34rem)');
+    const timers: number[] = [];
+    const anims: Animation[] = [];
+    let stopped = false;
+    const wait = (fn: () => void, t: number) => timers.push(window.setTimeout(fn, t));
+
+    // punch a soft hole in the floral layer around the text + CTAs
+    const applyMask = () => {
+      if (!lede) return;
+      const hr = root.getBoundingClientRect(), lr = lede.getBoundingClientRect();
+      root.style.setProperty('--mx', `${((lr.left + lr.right) / 2 - hr.left) / hr.width * 100}%`);
+      root.style.setProperty('--my', `${((lr.top + lr.bottom) / 2 - hr.top) / hr.height * 100}%`);
+      root.style.setProperty('--mw', `${(lr.width / hr.width) * 100 * 1.15 + 6}%`);
+      root.style.setProperty('--mh', `${(lr.height / hr.height) * 100 * 1.08 + 6}%`);
+      root.classList.add('is-masked');
+    };
+    applyMask();
+    let rt = 0;
+    const onResize = () => { clearTimeout(rt); rt = window.setTimeout(applyMask, 200); };
+    addEventListener('resize', onResize);
+    const teardownBase = () => { removeEventListener('resize', onResize); };
+
+    // reduced motion: fully static — no breeze, no petals (sway is CSS, off below)
+    if (reduce.matches) return teardownBase;
+
+    // ---- petals: a constant gentle breeze carrying petals up-and-left ----
+    // (flower sway is pure CSS; the only JS motion is this pool)
+    const layerW = () => petalLayer.clientWidth || root.clientWidth || 1200;
+    const layerH = () => petalLayer.clientHeight || 700;
+    // a few more petals in dark mode so the ambient field reads as full as light
+    const target = phone.matches ? 36 : small.matches ? 55 : 90;   // ambient breeze: 90 desktop / 55 tablet / 36 phone
+    const pool: HTMLElement[] = [];
+    let active = 0;
+
+    const launch = (p: HTMLElement) => {
+      if (stopped) return;
+      const W = layerW(), H = layerH(), depth = Math.random();
+      p.style.color = Math.random() < 0.5 ? 'var(--lily)' : '#e7dcd7';   // red / pale mix
+      const size = rand(8, 17);                                          // small→medium only
+      const startX = rand(-0.05, 1.05) * W;
+      const startY = rand(0.55, 1.04) * H;                               // rise from the field
+      const endX = startX - rand(0.14, 0.5) * W;                         // prevailing breeze: leftward
+      const endY = startY - rand(0.6, 1.1) * H;                          // upward, off-frame
+      const rot = rand(-90, 90);
+      const op = rand(0.26, 0.56) * (1 - depth * 0.3);
+      const speed = rand(12000, 21000) * (0.6 + depth * 0.5);            // slow, varied by depth
+      p.style.width = `${size}px`; p.style.top = '0'; p.style.left = '0';
+      active++;
+      const a = p.animate([
+        { transform: `translate3d(${startX}px, ${startY}px, 0) rotate(0deg)`, opacity: 0 },
+        { opacity: op, offset: 0.14 },
+        { opacity: op, offset: 0.82 },
+        { transform: `translate3d(${endX}px, ${endY}px, 0) rotate(${rot}deg)`, opacity: 0 },
+      ] as Keyframe[], { duration: speed, easing: 'linear' });
+      anims.push(a);
+      a.onfinish = () => { active--; if (!stopped && active < target) launch(p); else p.style.opacity = '0'; };
+    };
+    const add = () => { const p = document.createElement('div'); p.className = 'drift-petal'; p.innerHTML = petalSrc; petalLayer.appendChild(p); pool.push(p); return p; };
+
+    // stagger the initial spawn so they don't all cross together (tightened so
+    // the denser pool reaches full steady-state density in ~5s, not ~15s)
+    for (let i = 0; i < target; i++) wait(() => launch(add()), i * rand(30, 90));
+
+    const io = new IntersectionObserver(([e]) => { const m = e.isIntersecting ? 'play' : 'pause'; anims.forEach((a) => a[m]?.()); }, { threshold: 0 });
+    io.observe(root);
+
+    return () => { stopped = true; timers.forEach(clearTimeout); anims.forEach((a) => a.cancel()); io.disconnect(); teardownBase(); };
+  }
+
+  const cleanups: Cleanup[] = [];
+  const boot = () => { cleanups.splice(0).forEach((c) => c()); document.querySelectorAll<HTMLElement>('[data-herofield]').forEach((el) => cleanups.push(initField(el))); };
+  boot();
+  document.addEventListener('astro:before-swap', () => cleanups.splice(0).forEach((c) => c()));
+  document.addEventListener('astro:page-load', boot);
+</script>
+
+<style>
+  .herofield { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: clip; }
+
+  /* ---------- sky: clean blood moon ---------- */
+  .hf__sky { position: absolute; inset: 0; overflow: clip; }
+
+  /* Harvest/blood moon through haze: a clean uniform crimson disc with the
+     gentlest directional shading; all the atmosphere lives in the soft edge
+     and the wide halo — no surface texture, no blotches. */
+  .hf__moon {
+    position: absolute;
+    top: clamp(13%, 15vw, 20%);
+    left: 60%;
+    width: clamp(260px, 24vw, 360px);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background:
+      /* whisper-subtle lean (matte in dark — the highlight is dialled down) */
+      radial-gradient(circle closest-side at 62% 38%, light-dark(rgba(171,44,44, 0.16), rgba(150,44,46, 0.06)) 0%, rgba(171,44,44, 0) 82%),
+      radial-gradient(circle closest-side at 36% 70%, light-dark(rgba(60,9,15, 0.14), rgba(40,8,12, 0.2)) 0%, rgba(60,9,15, 0) 84%),
+      /* clean uniform body → soft dissolve at the rim (deep, muted red in dark) */
+      radial-gradient(circle closest-side at 50% 50%,
+        light-dark(#7d1019, #841a24) 0%, light-dark(#7d1019, #841a24) 78%,
+        light-dark(rgba(125,16,25, 0.72), rgba(132,26,36, 0.72)) 90%,
+        light-dark(rgba(125,16,25, 0), rgba(132,26,36, 0)) 100%);
+    box-shadow: var(--moon-glow);
+    filter: blur(0.3px);
+  }
+  /* halo: dusty rose (light) / subtle, contained warm glow (dark) */
+  .hf__moon::before {
+    content: ''; position: absolute; inset: var(--moon-halo-inset, -24%);
+    border-radius: 50%;
+    background: radial-gradient(circle,
+      light-dark(color-mix(in srgb, var(--lily-deep) 18%, transparent), rgba(150,32,38, 0.2)) 0%,
+      light-dark(color-mix(in srgb, var(--rose) 26%, transparent), rgba(120,26,32, 0.12)) 46%,
+      light-dark(color-mix(in srgb, var(--rose-soft) 14%, transparent), rgba(96,20,26, 0.05)) 64%,
+      transparent 78%);
+    z-index: -1;
+  }
+
+  /* faint moonlight around the moon + top of the field — soft, no hard edge */
+  .hf__moonlight {
+    position: absolute; left: 30%; right: -4%; top: 0; height: 60%;
+    background: radial-gradient(52% 60% at 62% 34%, color-mix(in srgb, var(--lily) 55%, transparent) 0%, transparent 72%);
+    opacity: var(--moonlight-op, 0.09); mix-blend-mode: var(--moonlight-blend, multiply); pointer-events: none;
+  }
+  .herofield.is-masked {
+    -webkit-mask-image: radial-gradient(ellipse var(--mw, 40%) var(--mh, 60%) at var(--mx, 30%) var(--my, 40%), transparent 52%, #000 78%);
+    mask-image: radial-gradient(ellipse var(--mw, 40%) var(--mh, 60%) at var(--mx, 30%) var(--my, 40%), transparent 52%, #000 78%);
+  }
+
+  .hf__carpet {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    width: 100%; height: 66%;
+    /* horizon fade at top + a soft fade at the very bottom so the field
+       dissolves into the content instead of a hard cut-off line */
+    -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 28%, #000 83%, transparent 100%);
+    mask-image: linear-gradient(180deg, transparent 0%, #000 28%, #000 83%, transparent 100%);
+  }
+  /* ---------- gentle, always-on breeze ---------- */
+  /* Perf: each animated flower is promoted to its own compositor layer
+     (will-change) so the transform runs on the GPU and never repaints the
+     large (masked) carpet SVG. The dense mass itself stays STATIC — its old
+     group-sway repainted ~90 detailed flowers every frame and was the main
+     cause of the frame drops; the sway now lives on the sparse, visible
+     risers/foreground/tall lilies where it reads. */
+  .sway {
+    transform-box: fill-box; transform-origin: 50% 100%;
+    will-change: transform;
+    animation: hf-sway var(--sd, 6s) var(--dl, 0s) ease-in-out infinite alternate;
+  }
+  @keyframes hf-sway {
+    from { transform: rotate(calc(var(--amp, 1) * -1deg)); }
+    to   { transform: rotate(calc(var(--amp, 1) *  1deg)); }
+  }
+  /* the mass groups are kept as static containers (no per-frame repaint) */
+  .sway-grp { transform-box: fill-box; transform-origin: 50% 100%; }
+  /* slow opacity shimmer on a few distant pales (GPU-composited) */
+  .hf-shimmer { will-change: opacity; animation: hf-shimmer var(--sd, 5s) var(--dl, 0s) ease-in-out infinite; }
+  @keyframes hf-shimmer {
+    0%, 100% { opacity: calc(var(--o, 0.6) * 0.72); }
+    50%      { opacity: var(--o, 0.6); }
+  }
+
+  /* NB: field-stem styling lives in the <style is:global> block below — the
+     <path>s are injected via set:html and don't carry this component's scope
+     id, so a scoped `.hf__stems path` selector would never match them. */
+
+  .hf__stage { position: absolute; right: 0; top: 0; width: min(60%, 42rem); height: 62%; }
+  .hf__stage--left { right: auto; left: 0; width: min(46%, 34rem); }
+  .ffl {
+    position: absolute; left: var(--x); top: var(--y); width: var(--w);
+    transform-origin: 50% 100%;
+    opacity: calc(1 - var(--depth) * 0.26);   /* keep the foreground vivid */
+    filter: blur(calc(var(--depth) * 1.1px));
+    will-change: transform;                   /* GPU layer for the sway */
+    animation: hf-sway var(--sd, 6s) var(--dl, 0s) ease-in-out infinite alternate;
+    --lily-hair: 1.7px;                        /* bolder stamens at hero scale */
+    /* pale in light; brighter white + visible dark stem in dark */
+    --f-petal: light-dark(#f4f1ee, #ede2e3); --f-petal-back: light-dark(#ded8d2, #cdc0c2);
+    --f-hair: light-dark(#cdc6bf, #beb0b2); --f-anther: light-dark(#b3a89f, #97898b);
+    /* delicate dusty-sage whisper (light) / bone-white thread (dark) */
+    --f-stem: light-dark(rgba(181, 168, 135, 0.55), #ede4e0);
+    --lily-stem: 0.8px;                        /* hair-thin in both modes */
+  }
+  .ffl :global(svg) { transform: scaleX(var(--flip, 1)); }
+  /* deep blood-red (light) → the brightest white lily (dark) */
+  .ffl.is-red {
+    --f-petal: light-dark(#a5121f, #f6eef0); --f-petal-back: light-dark(#690000, #ddd1d2);
+    --f-hair: light-dark(#8a121a, #cfc2c4); --f-anther: light-dark(#3d0c0c, #ab9d9f);
+    --f-stem: light-dark(rgba(181, 168, 135, 0.55), #ede4e0);
+  }
+
+  .hf__petals { position: absolute; inset: 0; }
+
+  @media (max-width: 52rem) {
+    .hf__stage { width: 78%; height: 34%; }
+    .hf__carpet { height: 54%; }
+    .hf__under { opacity: 0.6; }          /* thin the hazy bones on small screens */
+    /* phones/tablets: only the tall lilies + petals move (fewest layers) */
+    .sway, .hf-shimmer { animation: none; will-change: auto; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sway, .sway-grp, .ffl, .hf-shimmer { animation: none; }
+    .drift-petal { display: none; }
+  }
+</style>
+
+<style is:global>
+  .drift-petal {
+    position: absolute; left: 0; top: 0; width: 14px;
+    opacity: 0; line-height: 0; color: var(--lily); will-change: transform, opacity;
+  }
+  .drift-petal svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .drift-petal .petal, .drift-petal .petal.is-back { fill: currentColor; }
+  @media (prefers-reduced-motion: reduce) { .drift-petal { display: none; } }
+
+  /* Field stems (global: the <path>s are set:html and carry no component scope).
+     Both modes hair-thin, non-scaling — sumi-e whispers, not bold stalks.
+     Light: delicate dusty sage. Dark: bone-white threads (unchanged). */
+  .hf__stems path { fill: none; stroke: light-dark(#b5a887, #f0e8e4); stroke-width: 0.8px; vector-effect: non-scaling-stroke; stroke-linecap: round; opacity: 0.5; }
+  .hf__stems--front path { stroke: light-dark(#0000, #f0e8e4); }   /* front flowers: dark-only */
+  :root[data-theme='dark'] .hf__stems path { stroke-width: 0.9px; opacity: 0.9; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']) .hf__stems path { stroke-width: 0.9px; opacity: 0.9; }
+  }
+
+  /* ---- field flower tiers (themeable). Registered so they fade on toggle. ---- */
+  @property --flp-petal { syntax: '<color>'; inherits: true; initial-value: #c1272d; }
+  @property --flp-back  { syntax: '<color>'; inherits: true; initial-value: #8b0000; }
+  @property --flp-hair  { syntax: '<color>'; inherits: true; initial-value: #b81f26; }
+  @property --flp-anther{ syntax: '<color>'; inherits: true; initial-value: #5a1414; }
+  @property --flp-stem  { syntax: '<color>'; inherits: true; initial-value: #9d1f24; }
+  @property --fld-petal { syntax: '<color>'; inherits: true; initial-value: #a5121f; }
+  @property --fld-back  { syntax: '<color>'; inherits: true; initial-value: #690000; }
+  @property --fld-hair  { syntax: '<color>'; inherits: true; initial-value: #8a121a; }
+  @property --fld-anther{ syntax: '<color>'; inherits: true; initial-value: #3d0c0c; }
+  @property --fld-stem  { syntax: '<color>'; inherits: true; initial-value: #6d1016; }
+  @property --flw-petal { syntax: '<color>'; inherits: true; initial-value: #f4f1ee; }
+  @property --flw-back  { syntax: '<color>'; inherits: true; initial-value: #ded8d2; }
+  @property --flw-hair  { syntax: '<color>'; inherits: true; initial-value: #cdc6bf; }
+  @property --flw-anther{ syntax: '<color>'; inherits: true; initial-value: #b3a89f; }
+  @property --flw-stem  { syntax: '<color>'; inherits: true; initial-value: #cdc6bf; }
+
+  :root {
+    /* LIGHT values are identical to the previous baked colours; DARK = white
+       spider lily (fld brightest → flp mid → flw dimmest); stems go dark. */
+    --flp-petal: light-dark(#c1272d, #ede2e3); --flp-back: light-dark(#8b0000, #d1c4c6);
+    --flp-hair: light-dark(#b81f26, #c1b3b5);  --flp-anther: light-dark(#5a1414, #9e9092);
+    --flp-stem: light-dark(#9d1f24, #4a4240);
+    --fld-petal: light-dark(#a5121f, #f6eef0); --fld-back: light-dark(#690000, #ddd1d2);
+    --fld-hair: light-dark(#8a121a, #cfc2c4);  --fld-anther: light-dark(#3d0c0c, #ab9d9f);
+    --fld-stem: light-dark(#6d1016, #4a4240);
+    --flw-petal: light-dark(#f4f1ee, #c6babc); --flw-back: light-dark(#ded8d2, #a99c9e);
+    --flw-hair: light-dark(#cdc6bf, #9c8f92);  --flw-anther: light-dark(#b3a89f, #82767a);
+    --flw-stem: light-dark(#cdc6bf, #4a4240);
+    /* NB: deliberately NOT transitioned — interpolating these would repaint the
+       whole dense carpet (~10k <use> paths) every frame. The field snaps to the
+       new palette (hidden under the gust wipe); only the UI cross-fades. */
+  }
+</style>

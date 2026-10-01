@@ -1,0 +1,28 @@
+---
+// Section divider: hairline — bud — hairline.
+import Lily from './Lily.astro';
+interface Props { class?: string }
+const { class: className } = Astro.props;
+---
+<div class:list={['ornament', className]} role="separator">
+  <Lily variant="bud" class="ornament__bud" />
+</div>
+
+<style>
+  .ornament {
+    display: flex;
+    align-items: center;
+    gap: var(--space-m);
+    color: var(--rule-strong);
+    margin-block: var(--space-2xl);
+  }
+  .ornament::before,
+  .ornament::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--rule-strong));
+  }
+  .ornament::after { background: linear-gradient(90deg, var(--rule-strong), transparent); }
+  .ornament :global(.ornament__bud) { width: 0.9rem; }
+</style>

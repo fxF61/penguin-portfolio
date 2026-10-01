@@ -1,0 +1,25 @@
+---
+import Base from '../../layouts/Base.astro';
+import WriteupCard from '../../components/WriteupCard.astro';
+import { getWriteups } from '../../lib';
+const writeups = await getWriteups();
+---
+<Base title="Writeups" intensity="atmosphere">
+  <header class="wrap page-head">
+    <p class="eyebrow eyebrow--lily">Retired machines &amp; labs</p>
+    <h1 class="display">Writeups</h1>
+    <p class="lede">Full attack chains, start to Domain Admin. Phase 3 adds filtering by OS, difficulty and tag.</p>
+  </header>
+  <div class="wrap">
+    <div class="card-grid">
+      {writeups.map((entry) => <WriteupCard entry={entry} />)}
+    </div>
+  </div>
+</Base>
+
+<style>
+  .page-head { padding-block: var(--space-2xl) var(--space-xl); display: grid; gap: var(--space-s); }
+  .page-head h1 { font-size: var(--step-5); }
+  .page-head .lede { max-width: 52ch; }
+  .card-grid { display: grid; gap: var(--space-l); grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); }
+</style>

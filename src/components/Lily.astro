@@ -1,0 +1,18 @@
+---
+// Inlines one of the generated higanbana SVGs (src/assets/lilies/*.svg).
+// Hugo port: layouts/partials/lily.html with the same markup + classes.
+const art = import.meta.glob<string>('../assets/lilies/*.svg', { query: '?raw', import: 'default', eager: true });
+
+export type LilyVariant = 'head' | 'bloom-1' | 'bloom-2' | 'bloom-3' | 'bud' | 'petal';
+interface Props {
+  variant?: LilyVariant;
+  tone?: 'fill' | 'line' | 'mist' | 'ink' | 'field';
+  class?: string;
+  style?: string;
+}
+
+const { variant = 'head', tone = 'fill', class: className, style } = Astro.props;
+const svg = art[`../assets/lilies/${variant}.svg`];
+if (!svg) throw new Error(`Unknown lily variant: ${variant}`);
+---
+<span class:list={['lily', `lily--${tone}`, `lily--${variant}`, className]} style={style} aria-hidden="true" set:html={svg} />

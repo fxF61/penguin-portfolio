@@ -1,0 +1,202 @@
+---
+import Base from '../layouts/Base.astro';
+import HeroField from '../components/HeroField.astro';
+import Ornament from '../components/Ornament.astro';
+import Lily from '../components/Lily.astro';
+import WriteupCard from '../components/WriteupCard.astro';
+import { getWriteups, getNotes, formatDate } from '../lib';
+
+const writeups = await getWriteups();
+const notes = await getNotes();
+const featured = writeups.filter((w) => w.data.featured).slice(0, 2);
+const recentNotes = notes.slice(0, 3);
+---
+<Base intensity="atmosphere">
+  <!-- HERO — full-bleed cinematic frame; text constrained inside ------- -->
+  <section class="hero">
+    <HeroField />
+    <div class="hero__inner">
+      <div class="hero__lede">
+        <p class="eyebrow eyebrow--lily">Active Directory · Hack The Box · CTF</p>
+        <h1 class="hero__title display">
+          Every root leaves<br /><em>a stain.</em>
+        </h1>
+        <p class="hero__sub lede">
+          I'm <strong>penguin</strong> — a third-year CS student who breaks Windows
+          domains for sport and writes down how. Field notes from the other shore.
+        </p>
+        <div class="hero__cta">
+          <a class="btn btn--solid" href="/writeups/">Read the writeups</a>
+          <a class="btn btn--ghost" href="/about/">Who I am</a>
+        </div>
+      </div>
+
+      <div class="hero__art" aria-hidden="true"></div>
+    </div>
+  </section>
+
+  <Ornament />
+
+  <!-- FEATURED WRITEUPS ------------------------------------------------ -->
+  <section class="wrap section section--writeups">
+    <!-- the hero atmosphere lingers: a few stemless heads, heavily blurred into
+         soft washes (no stems/dots) — the last whispers of the field -->
+    <div class="linger" aria-hidden="true">
+      <Lily variant="head" tone="field" class="linger__l linger__l--1" />
+      <Lily variant="head" tone="field" class="linger__l linger__l--3" />
+      <Lily variant="head" tone="field" class="linger__l linger__l--4" />
+    </div>
+    <header class="section__head">
+      <h2 class="display">Selected writeups</h2>
+      <a class="section__more" href="/writeups/">All writeups →</a>
+    </header>
+    <div class="card-grid">
+      {featured.map((entry) => <WriteupCard entry={entry} />)}
+    </div>
+  </section>
+
+  <!-- RECENT NOTES ----------------------------------------------------- -->
+  <section class="wrap section">
+    <header class="section__head">
+      <h2 class="display">Recent notes</h2>
+      <a class="section__more" href="/notes/">All notes →</a>
+    </header>
+    <ul class="note-list" role="list">
+      {recentNotes.map((n) => (
+        <li class="note-row">
+          <a href={`/notes/${n.id}/`}>
+            <span class="note-row__title">{n.data.title}</span>
+            <span class="note-row__desc">{n.data.description}</span>
+          </a>
+          <time class="meta" datetime={n.data.date.toISOString()}>{formatDate(n.data.date)}</time>
+        </li>
+      ))}
+    </ul>
+  </section>
+</Base>
+
+<style>
+  /* ---------- hero (full-bleed cinematic frame) ---------- */
+  .hero {
+    position: relative;
+    width: 100vw;
+    margin-inline: calc(50% - 50vw);   /* break out of the page container */
+    margin-top: calc(-1 * var(--nav-h)); /* bleed up behind the overlay nav */
+    padding-top: calc(var(--nav-h) + var(--space-3xl)); /* keep text where it was */
+    padding-bottom: var(--space-4xl);
+    min-height: min(108svh, 62rem);
+    overflow: clip;
+  }
+  /* text/CTAs stay at a readable width, positioned left within the frame */
+  .hero__inner {
+    position: relative;
+    z-index: 2;
+    width: min(100% - 2 * var(--gutter), var(--wrap));
+    margin-inline: auto;
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: var(--space-2xl);
+    align-items: start;
+  }
+  .hero__lede { position: relative; z-index: 2; }
+  .hero__art { position: relative; z-index: 1; }
+  .hero__title {
+    font-size: var(--step-6);
+    margin-block: var(--space-s) var(--space-l);
+  }
+  .hero__sub { max-width: 34ch; }
+  .hero__sub strong { font-weight: 600; }
+  .hero__cta { display: flex; flex-wrap: wrap; gap: var(--space-s); margin-top: var(--space-xl); }
+
+  .btn {
+    display: inline-flex; align-items: center;
+    padding: 0.7em 1.4em;
+    font-family: var(--font-label);
+    font-size: var(--step--1);
+    letter-spacing: var(--label-tracking);
+    text-transform: var(--label-transform);
+    text-decoration: none;
+    border-radius: var(--radius-pill);
+    border: 1px solid transparent;
+    transition: all var(--dur-1) var(--ease-soft);
+  }
+  .btn--solid { background: var(--lily); color: var(--paper); }
+  .btn--solid:hover { background: var(--lily-deep); color: var(--paper); transform: translateY(-1px); }
+  .btn--ghost { border-color: var(--rule-strong); color: var(--ink); }
+  .btn--ghost:hover { border-color: var(--lily); color: var(--lily-deep); }
+
+  .hero__art { min-height: 22rem; }
+
+  /* ---------- sections ---------- */
+  .section { margin-block: var(--space-2xl); }
+  .section__head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: var(--space-m); flex-wrap: wrap;
+    margin-bottom: var(--space-l);
+  }
+  .section__head h2 { font-size: var(--step-3); }
+  .section__more {
+    font-family: var(--font-label); font-size: var(--step--1);
+    letter-spacing: var(--label-tracking); text-transform: var(--label-transform);
+    color: var(--mute); text-decoration: none;
+  }
+  .section__more:hover { color: var(--lily-deep); }
+
+  .card-grid {
+    display: grid;
+    gap: var(--space-l);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+  }
+
+  /* ---------- linger: hero atmosphere bleeding into the content ---------- */
+  .section--writeups { position: relative; }
+  .section--writeups > .section__head,
+  .section--writeups > .card-grid { position: relative; z-index: 1; }
+  .linger {
+    position: absolute; z-index: 0; pointer-events: none;
+    top: -9rem; left: 50%; transform: translateX(-50%);
+    width: 100vw; height: 15rem; overflow: clip;
+    /* soft in from the hero, soft out again — heads centred in the solid zone */
+    -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 26%, #000 58%, transparent 94%);
+    mask-image: linear-gradient(180deg, transparent 0, #000 26%, #000 58%, transparent 94%);
+    /* colours echo the hero: crimson (light) / pale (dark) */
+    --f-petal: light-dark(#c1272d, #d8ccce); --f-petal-back: light-dark(#8b0000, #b8abad);
+    --f-hair: light-dark(#b81f26, #b0a2a4); --f-anther: light-dark(#5a1414, #8a7c7e);
+    --f-stem: light-dark(#8a9a84, #c9bdbe);
+  }
+  /* dissolved to formless soft washes — no stamens, lines or anther dots read.
+     :global() so the rules reach the Lily component's own <span> (its scope). */
+  .linger :global(.linger__l) { position: absolute; opacity: 0.35; filter: blur(13px); }
+  .linger :global(.linger__l--1) { left: 8%;  top: 3rem; width: 8rem; }
+  .linger :global(.linger__l--3) { left: 44%; top: 2.5rem; width: 9rem; }
+  .linger :global(.linger__l--4) { left: 80%; top: 3.5rem; width: 8rem; }
+
+  /* ---------- note list ---------- */
+  .note-list { display: grid; padding: 0; list-style: none; }
+  .note-row {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: var(--space-l); flex-wrap: wrap;
+    padding-block: var(--space-m);
+    border-top: var(--hairline);
+  }
+  .note-row:last-child { border-bottom: var(--hairline); }
+  .note-row a { display: grid; gap: 0.15rem; text-decoration: none; flex: 1; min-width: 15rem; }
+  .note-row__title { font-family: var(--font-display); font-size: var(--step-1); color: var(--ink); transition: color var(--dur-1); }
+  .note-row:hover .note-row__title { color: var(--lily-deep); }
+  .note-row__desc { color: var(--mute); font-size: var(--step--1); }
+
+  @media (max-width: 52rem) {
+    .hero {
+      min-height: min(94svh, 44rem);   /* still room for a thinned field below */
+      padding-top: var(--space-2xl);
+    }
+    .hero__inner { grid-template-columns: 1fr; gap: var(--space-l); }
+    .hero__art { order: -1; min-height: 12rem; }  /* space at top for the tall lilies */
+    .hero__title { font-size: var(--step-4); }     /* keep the two-line break from clipping */
+    .linger { top: -14rem; height: 22rem; }
+    .linger__l--4 { display: none; }  /* sparser on small screens */
+  }
+  @media (max-width: 26rem) {
+    .hero__title { font-size: var(--step-3); }
+  }
+</style>

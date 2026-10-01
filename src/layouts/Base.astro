@@ -1,0 +1,62 @@
+---
+// Pairing A (default) — the only fonts every page loads.
+import '@fontsource-variable/cormorant-garamond/wght.css';
+import '@fontsource-variable/cormorant-garamond/wght-italic.css';
+import '@fontsource-variable/newsreader/opsz.css';
+import '@fontsource-variable/newsreader/opsz-italic.css';
+import '@fontsource-variable/jetbrains-mono/wght.css';
+
+import '../styles/tokens.css';
+import '../styles/base.css';
+import '../styles/lily.css';
+import '../styles/code.css';
+import '../styles/prose.css';
+
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+
+interface Props {
+  title?: string;
+  description?: string;
+  /** atmosphere: veil, grain, motion allowed. calm: reading-first, no ambient effects. */
+  intensity?: 'atmosphere' | 'calm';
+}
+
+const {
+  title,
+  description = 'Writeups and notes on Active Directory, Hack The Box and CTFs — by penguin.',
+  intensity = 'atmosphere',
+} = Astro.props;
+const fullTitle = title ? `${title} · penguin` : 'penguin — writeups & notes';
+---
+<!doctype html>
+<html lang="en" data-intensity={intensity}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#f8f5f2" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    {/* set the saved theme before first paint to avoid a flash */}
+    <script is:inline>
+      (() => {
+        try {
+          const t = localStorage.getItem('theme');
+          if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+        } catch (e) {}
+      })();
+    </script>
+    <slot name="head" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    {intensity === 'atmosphere' && <div class="veil" aria-hidden="true"></div>}
+    <SiteHeader />
+    <main id="main">
+      <slot />
+    </main>
+    <SiteFooter />
+  </body>
+</html>
