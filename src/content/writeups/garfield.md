@@ -6,6 +6,8 @@ platform: "Hack The Box"
 os: "Windows"
 difficulty: "Medium"
 tags: ["walkthrough", "htb", "active", "bloodhound", "rbcd", "acl-abuse", "golden-ticket"]
+cover: ../../assets/images/garfield-htb.png
+coverAlt: "Garfield HTB"
 ---
 
 Given Credentials

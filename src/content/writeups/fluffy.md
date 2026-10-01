@@ -6,6 +6,8 @@ platform: "Hack The Box"
 os: "Windows"
 difficulty: "Medium"
 tags: ["walkthrough", "htb", "kerberoasting", "adcs", "bloodhound", "shadow-credentials"]
+cover: ../../assets/images/fluffy.png
+coverAlt: "Fluffy HTB"
 ---
 
 ## Executive Summary

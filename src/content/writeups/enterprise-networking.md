@@ -6,6 +6,8 @@ platform: "Lab"
 os: "Other"
 difficulty: "Medium"
 tags: ["networking", "lab", "cisco", "eigrp", "vlan"]
+cover: ../../assets/images/enterprise-networking-cover.png
+coverAlt: "Enterprise Networking"
 ---
 
 # Executive Summary

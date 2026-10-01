@@ -6,6 +6,8 @@ platform: "Hack The Box"
 os: "Windows"
 difficulty: "Medium"
 tags: ["walkthrough", "htb", "adcs", "dcsync"]
+cover: ../../assets/images/vulncicada-htb.png
+coverAlt: "VulnCicada HTB"
 ---
 
 **Target:** DC-JPQ225.cicada.vl  

@@ -1,5 +1,6 @@
 ---
 import type { CollectionEntry } from 'astro:content';
+import { Image } from 'astro:assets';
 import { formatDate, withBase } from '../lib';
 import Lily from './Lily.astro';
 
@@ -7,9 +8,15 @@ interface Props { entry: CollectionEntry<'writeups'>; }
 const { entry } = Astro.props;
 const { data } = entry;
 ---
-<article class="card">
+<article class="card" class:list={[{ 'card--has-cover': data.cover }]}>
   <a class="card__hit" href={withBase(`/writeups/${entry.id}/`)} aria-labelledby={`t-${entry.id}`}></a>
   <Lily variant="head" tone="mist" class="card__bloom" />
+
+  {data.cover && (
+    <div class="card__cover">
+      <Image class="card__cover-img" src={data.cover} alt={data.coverAlt} widths={[380, 760]} sizes="(max-width: 52rem) 92vw, 30rem" />
+    </div>
+  )}
 
   <header class="card__head">
     <span class="eyebrow">{data.platform}</span>
@@ -63,6 +70,27 @@ const { data } = entry;
   }
   .card:hover :global(.card__bloom), .card:focus-within :global(.card__bloom) {
     opacity: 0.6; transform: rotate(0) scale(1);
+  }
+
+  /* cover art: full-bleed to the card edges at the top, rounded by the card's
+     own overflow:clip + radius (top corners only). 3:2 keeps card heights even. */
+  .card__cover {
+    position: relative;
+    margin: calc(-1 * var(--space-l)) calc(-1 * var(--space-l)) 0;
+    aspect-ratio: 3 / 2;
+    overflow: clip;
+    background: var(--paper-sunk);
+  }
+  .card__cover :global(.card__cover-img) {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+  }
+  /* subtle vignette so the art blends into the card instead of sitting flat
+     (fades to the card surface — reads a touch stronger in dark mode) */
+  .card__cover::after {
+    content: '';
+    position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(180deg, transparent 56%, color-mix(in srgb, var(--paper-raised) 72%, transparent));
+    box-shadow: inset 0 1px 0 color-mix(in srgb, var(--ink) 8%, transparent);
   }
 
   .card__head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-s); }

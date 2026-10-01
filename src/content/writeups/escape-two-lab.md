@@ -6,6 +6,8 @@ platform: "Hack The Box"
 os: "Windows"
 difficulty: "Medium"
 tags: ["walkthrough", "htb", "kerberoasting", "adcs", "bloodhound", "shadow-credentials", "acl-abuse"]
+cover: ../../assets/images/escape2.png
+coverAlt: "Escape-Two-Lab HTB"
 ---
 
 ## Enumeration

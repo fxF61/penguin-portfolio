@@ -6,6 +6,8 @@ platform: "Hack The Box"
 os: "Windows"
 difficulty: "Medium"
 tags: ["walkthrough", "htb", "adcs", "bloodhound", "shadow-credentials"]
+cover: ../../assets/images/certified.png
+coverAlt: "Certified HTB"
 ---
 
 #### Nmap scan

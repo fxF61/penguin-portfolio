@@ -6,6 +6,8 @@ platform: "Hack The Box"
 os: "Windows"
 difficulty: "Medium"
 tags: ["walkthrough", "htb", "active"]
+cover: ../../assets/images/silentium-htb.png
+coverAlt: "Silentium HTB"
 ---
 ## Summary
 The attack chain involves exploiting two critical vulnerabilities in **Flowise** (an AI workflow platform) to gain initial access, escaping a Docker container using leaked credentials, and escalating privileges to root by exploiting a symlink vulnerability in **Gogs** (a self-hosted Git service).

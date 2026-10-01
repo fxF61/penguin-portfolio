@@ -6,6 +6,8 @@ platform: "Lab"
 os: "Other"
 difficulty: "Medium"
 tags: []
+cover: ../../assets/images/proftp-cover.png
+coverAlt: "ProFTP MoinMoin Lab"
 ---
 
 SERVER  3 (192.168.9.131) (ProFTPD 1.3.3c) 

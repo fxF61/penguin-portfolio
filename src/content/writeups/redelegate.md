@@ -6,6 +6,9 @@ platform: "Hack The Box"
 os: "Windows"
 difficulty: "Medium"
 tags: ["walkthrough", "htb", "dcsync", "bloodhound", "rbcd", "acl-abuse"]
+cover: ../../assets/images/redelegate-htb.png
+coverAlt: "Redelegate HTB"
+featured: true
 ---
 **Target:** `10.129.234.50`  
 **Domain:** `redelegate.vl`  

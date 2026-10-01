@@ -6,6 +6,8 @@ platform: "Hack The Box"
 os: "Windows"
 difficulty: "Medium"
 tags: ["walkthrough", "htb"]
+cover: ../../assets/images/media-htb.png
+coverAlt: "Media HTB"
 ---
 
 ## Summary

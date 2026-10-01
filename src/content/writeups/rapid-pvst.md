@@ -6,6 +6,8 @@ platform: "Lab"
 os: "Other"
 difficulty: "Medium"
 tags: ["networking", "lab"]
+cover: ../../assets/images/rapid-pvst-cover.png
+coverAlt: "Rapid PVST+"
 ---
 **Improvements in RSTP**:
 - **Convergence:** < 1 second

@@ -6,6 +6,8 @@ platform: "Hack The Box"
 os: "Windows"
 difficulty: "Medium"
 tags: ["walkthrough", "htb"]
+cover: ../../assets/images/jeeves.png
+coverAlt: "Jeeves HTB"
 ---
 
 # Nmap

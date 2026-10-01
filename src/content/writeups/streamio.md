@@ -6,6 +6,8 @@ platform: "Hack The Box"
 os: "Windows"
 difficulty: "Medium"
 tags: ["walkthrough", "htb", "bloodhound"]
+cover: ../../assets/images/streamio-htb.png
+coverAlt: "StreamIO HTB"
 ---
 
 **Difficulty:** Hard 

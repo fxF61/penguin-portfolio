@@ -6,6 +6,8 @@ platform: "Hack The Box"
 os: "Windows"
 difficulty: "Medium"
 tags: ["walkthrough", "htb", "kerberoasting", "dcsync", "bloodhound", "acl-abuse"]
+cover: ../../assets/images/administrator.png
+coverAlt: "Administrator HTB"
 ---
 
 The first step our lab is basic enumeration with **Nmap**

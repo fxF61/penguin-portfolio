@@ -6,13 +6,16 @@ import { z } from 'astro/zod';
 
 const writeups = defineCollection({
   loader: glob({ pattern: '**/[^_]*.md', base: './src/content/writeups' }),
-  schema: z.object({
+  schema: ({ image }) => z.object({
     title: z.string(),
     description: z.string(),
     date: z.coerce.date(),
     platform: z.enum(['Hack The Box', 'TryHackMe', 'VulnLab', 'Lab']).default('Hack The Box'),
     os: z.enum(['Windows', 'Linux', 'Other']),
     difficulty: z.enum(['Easy', 'Medium', 'Hard', 'Insane']),
+    /** optional cover art (machine artwork); optimized via the asset pipeline */
+    cover: image().optional(),
+    coverAlt: z.string().default(''),
     tags: z.array(z.string()).default([]),
     /** one-line steps: foothold → user → root, rendered as the attack-chain summary */
     chain: z.array(z.string()).default([]),

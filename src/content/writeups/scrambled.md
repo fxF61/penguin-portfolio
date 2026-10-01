@@ -6,6 +6,8 @@ platform: "Hack The Box"
 os: "Windows"
 difficulty: "Medium"
 tags: ["walkthrough", "htb"]
+cover: ../../assets/images/Scrambled.png
+coverAlt: "Scrambled HTB"
 ---
 
 # NMAP RECON

@@ -6,6 +6,8 @@ platform: "Hack The Box"
 os: "Windows"
 difficulty: "Medium"
 tags: ["walkthrough", "htb", "kerberoasting", "adcs", "bloodhound", "shadow-credentials", "acl-abuse"]
+cover: ../../assets/images/Tombwatcher.png
+coverAlt: "Tombwatcher HTB"
 ---
 
 ### Executive Summary

@@ -6,6 +6,8 @@ platform: "Hack The Box"
 os: "Windows"
 difficulty: "Medium"
 tags: ["walkthrough", "htb", "active"]
+cover: ../../assets/images/interpreter-htb.png
+coverAlt: "Interpreter HTB"
 ---
 ## **Executive Summary**
 This report documents the successful penetration test of the Interpreter HTB machine. Critical vulnerabilities were identified that allowed for complete system compromise, from initial access through privilege escalation to root.

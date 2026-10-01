@@ -6,6 +6,8 @@ platform: "Lab"
 os: "Other"
 difficulty: "Medium"
 tags: ["report", "forensics", "academic"]
+cover: ../../assets/images/forensics-cover.png
+coverAlt: "Digital Forensics Report"
 ---
 
 This report documents the forensic analysis conducted on the CFL Cyber virtual machine, carried out in accordance with the ACPO Good Practice Guide for Digital Evidence (ACPO, 2012).

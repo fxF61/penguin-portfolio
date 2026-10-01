@@ -6,6 +6,8 @@ platform: "Hack The Box"
 os: "Windows"
 difficulty: "Medium"
 tags: ["walkthrough", "htb"]
+cover: ../../assets/images/pov-htb.png
+coverAlt: "POV HTB"
 ---
 
 **Target:** dev.pov.htb  

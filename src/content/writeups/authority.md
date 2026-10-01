@@ -6,6 +6,8 @@ platform: "Hack The Box"
 os: "Windows"
 difficulty: "Medium"
 tags: ["walkthrough", "htb", "adcs"]
+cover: ../../assets/images/authority-htb.png
+coverAlt: "Authority HTB"
 ---
 **Target:** AUTHORITY.authority.htb 
 **IP:** 10.129.229.56 

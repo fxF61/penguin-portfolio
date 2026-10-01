@@ -6,6 +6,9 @@ platform: "Hack The Box"
 os: "Windows"
 difficulty: "Medium"
 tags: ["walkthrough", "htb", "active-directory", "mssql", "dcsync", "ntlm-relay", "bloodhound"]
+cover: ../../assets/images/darkzero-htb.png
+coverAlt: "DarkZero HTB"
+featured: true
 ---
 
 **Target:**   `10.129.72.112`

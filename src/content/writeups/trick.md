@@ -6,6 +6,8 @@ platform: "Hack The Box"
 os: "Windows"
 difficulty: "Medium"
 tags: ["walkthrough", "htb"]
+cover: ../../assets/images/Trick.png
+coverAlt: "Trick HTB"
 ---
 
 # Nmap 

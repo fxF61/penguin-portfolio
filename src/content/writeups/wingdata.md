@@ -6,6 +6,8 @@ platform: "Hack The Box"
 os: "Windows"
 difficulty: "Medium"
 tags: ["walkthrough", "htb", "active"]
+cover: ../../assets/images/wingdata-htb.png
+coverAlt: "WingData HTB"
 ---
 ## Executive Summary 
 This report documents the successful penetration test of the WingData HTB machineIidentified critical vulnerabilities that allowed for complete system compromise, from initial access through privilege escalation to root.

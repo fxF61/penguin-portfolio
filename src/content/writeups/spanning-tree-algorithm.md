@@ -6,6 +6,8 @@ platform: "Lab"
 os: "Other"
 difficulty: "Medium"
 tags: []
+cover: ../../assets/images/spanning-tree-cover.png
+coverAlt: "Spanning Tree Algorithm"
 ---
 
 # **Spanning-tree-algorithm**

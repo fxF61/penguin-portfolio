@@ -6,6 +6,8 @@ platform: "Hack The Box"
 os: "Windows"
 difficulty: "Medium"
 tags: ["walkthrough", "htb"]
+cover: ../../assets/images/crafty-htb.png
+coverAlt: "Crafty HTB"
 ---
 **Target:** craft.htb 
 **IP:** 10.129.39.91

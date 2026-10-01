@@ -6,6 +6,8 @@ platform: "Hack The Box"
 os: "Windows"
 difficulty: "Medium"
 tags: ["walkthrough", "htb", "active"]
+cover: ../../assets/images/pterodactyl.png
+coverAlt: "Pterodactyl HTB"
 ---
 ## Summary
 The **Pterodactyl** target was fully compromised, resulting in **root-level access**. The attack chain began with web enumeration and virtual host discovery, progressed through a **known Pterodactyl Panel remote code execution vulnerability**, followed by **database credential extraction**, **password cracking**, and **SSH access as a local user**. Privilege escalation was achieved by chaining **Polkit session trust bypass (CVE-2025-6018)** with an **udisks2 filesystem mounting vulnerability (CVE-2025-6019)**.

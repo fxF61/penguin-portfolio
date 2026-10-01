@@ -6,6 +6,8 @@ platform: "Hack The Box"
 os: "Windows"
 difficulty: "Medium"
 tags: ["walkthrough", "htb", "active", "kerberoasting", "asrep-roasting", "adcs", "dcsync", "ntlm-relay", "bloodhound", "rbcd", "shadow-credentials", "acl-abuse"]
+cover: ../../assets/images/pirate-htb.png
+coverAlt: "Pirate HTB"
 ---
 **Target:** DC01 (10.129.12.119 ), WEB01 (192.168.100.2 internal)  
 **Given Credentials:** `pentest / p3nt3st2025!&`  
