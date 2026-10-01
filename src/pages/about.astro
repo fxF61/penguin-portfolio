@@ -1,39 +1,61 @@
 ---
 import Base from '../layouts/Base.astro';
+import { Image } from 'astro:assets';
 import Lily from '../components/Lily.astro';
 import Ornament from '../components/Ornament.astro';
 
+// cert badges (raster → optimized); pro-lab logos are SVG (imported as URLs)
+import cptsImg from '../assets/images/certs/cert-cpts.png';
+import crtoImg from '../assets/images/certs/cert-crto.png';
+import zephyrUrl from '../assets/images/certs/prolab-zephyr.svg?url';
+import offshoreUrl from '../assets/images/certs/prolab-offshore.svg?url';
+import danteUrl from '../assets/images/certs/prolab-dante.svg?url';
+
+const certs = [
+  { img: cptsImg, label: 'HTB CPTS' },
+  { img: crtoImg, label: 'CRTO' },
+];
+const prolabs = [
+  { url: zephyrUrl, label: 'Zephyr' },
+  { url: offshoreUrl, label: 'Offshore' },
+  { url: danteUrl, label: 'Dante' },
+];
+
 const skills = {
   'Active Directory': ['Kerberos abuse', 'AD CS / ESC paths', 'BloodHound', 'ACL abuse', 'DCSync'],
+  'Offensive internals': ['Shellcode', 'Process injection', 'Reflective loading', 'ETW / EDR evasion'],
   'Tradecraft': ['Enumeration', 'Privilege escalation', 'Lateral movement', 'Pivoting'],
   'Tooling': ['Impacket', 'NetExec', 'Certipy', 'Ligolo-ng', 'Sliver'],
   'Foundations': ['Linux', 'Windows internals', 'Networking', 'Python', 'PowerShell'],
 };
 const path = [
-  { when: 'Now', what: 'Third-year Computer Science — security focus' },
-  { when: 'Ongoing', what: 'Hack The Box · retired machines & Pro Labs' },
-  { when: 'Next', what: 'OSCP-track preparation' },
+  { when: 'Now', what: 'Computer Science graduate — security focus' },
+  { when: 'Ongoing', what: 'Hack The Box — Pro Labs & red team tradecraft' },
+  { when: 'Next', what: 'Windows internals, shellcode & custom tooling' },
+];
+const contact = [
+  { label: 'GitHub', handle: 'github.com/fxF61', href: 'https://github.com/fxF61' },
+  { label: 'LinkedIn', handle: 'in/falahnizam', href: 'https://www.linkedin.com/in/falahnizam' },
+  { label: 'Hack The Box', handle: 'fxF61', href: 'https://app.hackthebox.com/profile/fxF61' },
+  { label: 'Discord', handle: 'penguin09854', href: 'https://discord.com/users/penguin09854' },
 ];
 ---
 <Base title="About" intensity="atmosphere" topVeil>
+  <!-- HERO ------------------------------------------------------------- -->
   <section class="wrap about">
     <div class="about__intro">
       <p class="eyebrow eyebrow--lily">彼岸花 · the other shore</p>
       <h1 class="display about__title">I'm <em>penguin</em>.</h1>
       <div class="about__body">
         <p class="lede">
-          Third-year CS student, cybersecurity focus. I spend my time inside
-          Windows domains — Active Directory, Kerberos, certificate services —
-          and write up what holds and what gives way.
+          I am a Computer Science graduate and an offensive security researcher
+          passionate about understanding how attackers operate at the lowest levels.
         </p>
         <p>
-          The spider lily blooms after everything else has gone; it marks the
-          aftermath. That's the register I write in: not the thrill of the break,
-          but the quiet reconstruction of how it happened, so the next person can
-          follow it. Everything here concerns retired machines and lab
-          environments.
+          This portfolio documents my hands-on journey through Active Directory
+          exploitation, malware research, and red team tradecraft.
         </p>
-        <p class="meta">Elsewhere as <span class="mono">fxF61</span>.</p>
+        <p class="meta">Also known as <span class="mono">fxF61</span>.</p>
       </div>
     </div>
     <div class="about__art" aria-hidden="true">
@@ -43,71 +65,173 @@ const path = [
 
   <Ornament />
 
-  <section class="wrap about-cols">
-    <div class="skills">
-      <h2 class="display">What I work with</h2>
-      <dl class="skills__grid">
-        {Object.entries(skills).map(([group, items]) => (
-          <div class="skills__group">
-            <dt class="eyebrow">{group}</dt>
-            <dd>
-              <ul class="skills__list mono" role="list">
-                {items.map((s) => <li>{s}</li>)}
-              </ul>
-            </dd>
-          </div>
-        ))}
-      </dl>
-    </div>
+  <!-- RESEARCH FOCUS --------------------------------------------------- -->
+  <section class="wrap wrap--narrow about-section">
+    <h2 class="display">Research focus</h2>
+    <p class="about-prose">
+      My current research centers on offensive Windows internals, particularly how
+      legitimate operating system features can be abused for code execution and
+      evasion. I'm currently learning to write my own shellcode, study process
+      injection techniques (DLL injection, reflective loading, thread hijacking),
+      and explore how modern EDRs detect (or miss) these behaviours at the API and
+      ETW level.
+    </p>
+  </section>
 
-    <div class="path">
-      <h2 class="display">Where I am</h2>
-      <ol class="path__list" role="list">
-        {path.map((p) => (
-          <li class="path__row">
-            <span class="path__when eyebrow">{p.when}</span>
-            <span class="path__what">{p.what}</span>
-          </li>
-        ))}
-      </ol>
-      <div class="contact">
-        <p class="eyebrow">Contact</p>
-        <ul class="contact__links mono" role="list">
-          <li><a href="https://github.com/fxf61" rel="me noopener">github.com/fxF61</a></li>
-          <li><a href="#">Hack The Box — fxF61</a></li>
-        </ul>
-      </div>
-    </div>
+  <!-- WHAT I WORK WITH ------------------------------------------------- -->
+  <section class="wrap about-section">
+    <h2 class="display">What I work with</h2>
+    <dl class="skills__grid">
+      {Object.entries(skills).map(([group, items]) => (
+        <div class="skills__group">
+          <dt class="eyebrow">{group}</dt>
+          <dd>
+            <ul class="skills__list mono" role="list">
+              {items.map((s) => <li>{s}</li>)}
+            </ul>
+          </dd>
+        </div>
+      ))}
+    </dl>
+  </section>
+
+  <!-- CERTIFICATES ----------------------------------------------------- -->
+  <section class="wrap about-section">
+    <h2 class="display">Certificates</h2>
+    <ul class="badge-grid" role="list">
+      {certs.map((c) => (
+        <li class="badge">
+          <Image class="badge__img" src={c.img} width={220} alt={c.label} />
+          <span class="badge__label">{c.label}</span>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <!-- HTB PRO LABS ----------------------------------------------------- -->
+  <section class="wrap about-section">
+    <h2 class="display">HTB Pro Labs</h2>
+    <ul class="badge-grid" role="list">
+      {prolabs.map((p) => (
+        <li class="badge">
+          <img class="badge__img" src={p.url} alt={p.label} loading="lazy" decoding="async" />
+          <span class="badge__label">{p.label}</span>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <!-- WHERE I AM ------------------------------------------------------- -->
+  <section class="wrap wrap--narrow about-section">
+    <h2 class="display">Where I am</h2>
+    <ol class="path__list" role="list">
+      {path.map((p) => (
+        <li class="path__row">
+          <span class="path__when eyebrow">{p.when}</span>
+          <span class="path__what">{p.what}</span>
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <!-- CONTACT ---------------------------------------------------------- -->
+  <section class="wrap wrap--narrow about-section">
+    <h2 class="display">Contact</h2>
+    <p class="about-prose about-prose--tight">
+      Interested in collaborating or discussing security? Feel free to reach out.
+    </p>
+    <ul class="contact__links mono" role="list">
+      {contact.map((c) => (
+        <li>
+          <a href={c.href} rel="me noopener" target="_blank">
+            <span class="contact__label">{c.label}</span>
+            <span class="contact__handle">{c.handle}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <!-- CLOSING QUOTE ---------------------------------------------------- -->
+  <section class="wrap wrap--narrow about-quote">
+    <blockquote class="about-quote__q display">
+      “The only way to learn hacking is by hacking.”
+    </blockquote>
   </section>
 </Base>
 
 <style>
+  /* ---------- hero (kept) ---------- */
   .about { display: grid; grid-template-columns: 1.4fr 0.6fr; gap: var(--space-2xl); align-items: center; padding-block: var(--space-3xl) var(--space-xl); }
   .about__title { font-size: var(--step-5); margin-block: var(--space-xs) var(--space-l); }
   .about__body { display: grid; gap: var(--space-m); max-width: 54ch; color: var(--ink-soft); }
   .about__art { display: grid; place-items: center; }
   .about__art :global(.about__lily) { width: min(100%, 18rem); }
 
-  .about-cols { display: grid; grid-template-columns: 1.3fr 1fr; gap: var(--space-2xl); align-items: start; }
-  .about-cols h2 { font-size: var(--step-2); margin-bottom: var(--space-l); }
+  /* ---------- stacked sections ---------- */
+  .about-section { margin-block: var(--space-2xl); }
+  .about-section > h2 { font-size: var(--step-2); margin-bottom: var(--space-l); }
+  .about-prose { max-width: 60ch; color: var(--ink-soft); font-size: var(--step-0); line-height: 1.6; }
+  .about-prose--tight { margin-bottom: var(--space-l); }
 
+  /* ---------- skills (kept) ---------- */
   .skills__grid { display: grid; gap: var(--space-l); grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); }
   .skills__group dt { margin-bottom: var(--space-xs); }
   .skills__list { list-style: none; padding: 0; display: grid; gap: 0.3em; font-size: var(--step--1); color: var(--ink-soft); }
   .skills__list li { position: relative; padding-left: 1em; }
   .skills__list li::before { content: '·'; position: absolute; left: 0; color: var(--lily); }
 
-  .path__list { list-style: none; padding: 0; display: grid; gap: 0; margin-bottom: var(--space-xl); }
-  .path__row { display: grid; grid-template-columns: 5rem 1fr; gap: var(--space-m); padding-block: var(--space-s); border-top: var(--hairline); align-items: baseline; }
+  /* ---------- certificate / pro-lab badges ---------- */
+  .badge-grid {
+    list-style: none; padding: 0; margin: 0;
+    display: grid; gap: var(--space-xl);
+    grid-template-columns: repeat(3, minmax(0, max-content));
+    justify-content: start;
+  }
+  .badge { display: grid; justify-items: center; gap: var(--space-s); text-align: center; }
+  .badge__img {
+    width: 5.5rem; height: 5.5rem; object-fit: contain; display: block;
+    border-radius: var(--radius-m);
+    transition: transform var(--dur-2) var(--ease-soft), box-shadow var(--dur-2) var(--ease-soft);
+  }
+  .badge:hover .badge__img {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 22px color-mix(in srgb, var(--lily) 32%, transparent);
+  }
+  .badge__label {
+    font-family: var(--font-label); font-size: var(--step--1);
+    letter-spacing: var(--label-tracking); text-transform: var(--label-transform);
+    color: var(--ink-soft);
+  }
+
+  /* ---------- where I am (kept) ---------- */
+  .path__list { list-style: none; padding: 0; display: grid; gap: 0; max-width: 46rem; }
+  .path__row { display: grid; grid-template-columns: 6rem 1fr; gap: var(--space-m); padding-block: var(--space-s); border-top: var(--hairline); align-items: baseline; }
   .path__row:last-child { border-bottom: var(--hairline); }
   .path__what { font-family: var(--font-display); font-size: var(--step-1); }
 
-  .contact__links { list-style: none; padding: 0; display: grid; gap: 0.4em; font-size: var(--step--1); margin-top: var(--space-xs); }
+  /* ---------- contact ---------- */
+  .contact__links { list-style: none; padding: 0; display: grid; gap: var(--space-xs); font-size: var(--step--1); max-width: 30rem; }
+  .contact__links a { display: flex; justify-content: space-between; gap: var(--space-m); padding-block: var(--space-2xs); text-decoration: none; border-bottom: var(--hairline); }
+  .contact__label { color: var(--ink); }
+  .contact__handle { color: var(--mute); }
+  .contact__links a:hover .contact__handle { color: var(--lily-deep); }
+
+  /* ---------- closing quote ---------- */
+  .about-quote { text-align: center; padding-block: var(--space-3xl) var(--space-xl); }
+  .about-quote__q {
+    font-size: var(--step-3); font-style: italic; color: var(--ink);
+    max-width: 28ch; margin-inline: auto; line-height: var(--leading-snug);
+  }
 
   @media (max-width: 52rem) {
     .about { grid-template-columns: 1fr; }
     .about__art { order: -1; }
     .about__art :global(.about__lily) { width: min(60%, 12rem); }
-    .about-cols { grid-template-columns: 1fr; gap: var(--space-xl); }
+    .badge-grid { grid-template-columns: repeat(2, minmax(0, max-content)); gap: var(--space-l); }
+  }
+  @media (max-width: 30rem) {
+    .badge-grid { grid-template-columns: repeat(1, minmax(0, max-content)); }
+    .contact__links a { flex-direction: column; gap: 0; }
   }
 </style>
