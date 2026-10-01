@@ -35,5 +35,5 @@ comes first. Second heading so the table of contents has depth to render.
 
 ## Escalation
 
-Closing section. A [sample link](/writeups/) to test inline link colour and the
+Closing section. A [sample link](../) to test inline link colour and the
 crimson underline on hover.
