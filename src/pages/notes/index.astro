@@ -1,6 +1,6 @@
 ---
 import Base from '../../layouts/Base.astro';
-import { getNotes, formatDate } from '../../lib';
+import { getNotes, formatDate, withBase } from '../../lib';
 const notes = await getNotes();
 ---
 <Base title="Notes" intensity="atmosphere" topVeil>
@@ -13,7 +13,7 @@ const notes = await getNotes();
     <ul class="note-list" role="list">
       {notes.map((n) => (
         <li class="note-row">
-          <a href={`/notes/${n.id}/`}>
+          <a href={withBase(`/notes/${n.id}/`)}>
             <span class="note-row__title">{n.data.title}</span>
             <span class="note-row__desc">{n.data.description}</span>
           </a>

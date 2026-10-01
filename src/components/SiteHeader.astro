@@ -1,16 +1,20 @@
 ---
 import Lily from './Lily.astro';
+import { withBase } from '../lib';
 
 const nav = [
   { href: '/writeups/', label: 'Writeups' },
   { href: '/notes/', label: 'Notes' },
   { href: '/about/', label: 'About' },
 ];
-const path = Astro.url.pathname;
-const isCurrent = (href: string) => path === href || path.startsWith(href);
+const path = Astro.url.pathname;   // includes the base path in production
+const isCurrent = (href: string) => {
+  const full = withBase(href);
+  return path === full || path.startsWith(full);
+};
 ---
 <header class="site-header wrap">
-  <a class="wordmark" href="/" aria-label="penguin — home">
+  <a class="wordmark" href={withBase('/')} aria-label="penguin — home">
     <Lily variant="petal" class="wordmark__petal" />
     <span class="wordmark__name">penguin</span>
   </a>
@@ -19,7 +23,7 @@ const isCurrent = (href: string) => path === href || path.startsWith(href);
     <ul role="list">
       {nav.map((item) => (
         <li>
-          <a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>{item.label}</a>
+          <a href={withBase(item.href)} aria-current={isCurrent(item.href) ? 'page' : undefined}>{item.label}</a>
         </li>
       ))}
       <li>
@@ -29,7 +33,7 @@ const isCurrent = (href: string) => path === href || path.startsWith(href);
         </button>
       </li>
       <li>
-        <a href="/search/" class="site-nav__search" aria-current={isCurrent('/search/') ? 'page' : undefined}>
+        <a href={withBase('/search/')} class="site-nav__search" aria-current={isCurrent('/search/') ? 'page' : undefined}>
           <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="m10.4 10.4 3.4 3.4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
           <span>Search</span>
         </a>

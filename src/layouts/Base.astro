@@ -14,6 +14,7 @@ import '../styles/prose.css';
 
 import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
+import { withBase } from '../lib';
 
 interface Props {
   title?: string;
@@ -41,7 +42,7 @@ const fullTitle = title ? `${title} · penguin` : 'penguin — writeups & notes'
     <meta name="description" content={description} />
     <meta name="theme-color" content="#f8f5f2" />
     <meta name="color-scheme" content="light dark" />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href={withBase('/favicon.svg')} type="image/svg+xml" />
     {/* set the saved theme before first paint to avoid a flash */}
     <script is:inline>
       (() => {

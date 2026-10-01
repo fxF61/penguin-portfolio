@@ -1,6 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import Lily from '../components/Lily.astro';
+import { withBase } from '../lib';
 ---
 <Base title="Lost" intensity="atmosphere">
   <section class="wrap notfound">
@@ -8,7 +9,7 @@ import Lily from '../components/Lily.astro';
     <p class="eyebrow eyebrow--lily">404 · aftermath</p>
     <h1 class="display notfound__title">Nothing blooms here.</h1>
     <p class="lede">The page fell away. What's left is on the other pages.</p>
-    <p><a class="notfound__home" href="/">← Back to the beginning</a></p>
+    <p><a class="notfound__home" href={withBase('/')}>← Back to the beginning</a></p>
   </section>
 </Base>
 

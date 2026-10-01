@@ -3,9 +3,11 @@
    ========================================================================== */
 
 @font-face {
-  /* Shippori Mincho Medium, subset to 彼岸花曼珠沙華・ (2.7 KB). OFL — see /fonts. */
+  /* Shippori Mincho Medium, subset to 彼岸花曼珠沙華・ (2.7 KB). OFL — see
+     public/fonts. Relative src so Vite fingerprints it and applies the deploy
+     base path automatically (don't hardcode an absolute /fonts path). */
   font-family: 'Higanbana Mincho';
-  src: url('/fonts/higanbana-mincho.woff2') format('woff2');
+  src: url('../assets/fonts/higanbana-mincho.woff2') format('woff2');
   font-weight: 500;
   font-display: swap;
 }

@@ -2,7 +2,7 @@
 import { render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import Ornament from '../../components/Ornament.astro';
-import { getWriteups, formatDate } from '../../lib';
+import { getWriteups, formatDate, withBase } from '../../lib';
 
 export async function getStaticPaths() {
   const writeups = await getWriteups();
@@ -62,7 +62,7 @@ const toc = headings.filter((h) => h.depth === 2);
     </div>
 
     <Ornament />
-    <p class="article__back"><a href="/writeups/">← All writeups</a></p>
+    <p class="article__back"><a href={withBase('/writeups/')}>← All writeups</a></p>
   </article>
 </Base>
 

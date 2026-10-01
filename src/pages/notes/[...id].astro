@@ -2,7 +2,7 @@
 import { render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import Ornament from '../../components/Ornament.astro';
-import { getNotes, formatDate } from '../../lib';
+import { getNotes, formatDate, withBase } from '../../lib';
 
 export async function getStaticPaths() {
   const notes = await getNotes();
@@ -22,7 +22,7 @@ const { Content } = await render(entry);
     </header>
     <div class="prose"><Content /></div>
     <Ornament />
-    <p class="note__back"><a href="/notes/">← All notes</a></p>
+    <p class="note__back"><a href={withBase('/notes/')}>← All notes</a></p>
   </article>
 </Base>
 

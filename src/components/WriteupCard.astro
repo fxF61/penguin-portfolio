@@ -1,6 +1,6 @@
 ---
 import type { CollectionEntry } from 'astro:content';
-import { formatDate } from '../lib';
+import { formatDate, withBase } from '../lib';
 import Lily from './Lily.astro';
 
 interface Props { entry: CollectionEntry<'writeups'>; }
@@ -8,7 +8,7 @@ const { entry } = Astro.props;
 const { data } = entry;
 ---
 <article class="card">
-  <a class="card__hit" href={`/writeups/${entry.id}/`} aria-labelledby={`t-${entry.id}`}></a>
+  <a class="card__hit" href={withBase(`/writeups/${entry.id}/`)} aria-labelledby={`t-${entry.id}`}></a>
   <Lily variant="head" tone="mist" class="card__bloom" />
 
   <header class="card__head">

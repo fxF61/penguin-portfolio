@@ -12,3 +12,14 @@ export async function getNotes() {
 
 export const formatDate = (d: Date) =>
   d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+
+/**
+ * Prefix a root-relative internal path with the deploy base path
+ * (`/penguin-portfolio` in production, `/` in dev). Use for every internal
+ * link/asset so they resolve correctly under the GitHub Pages project base.
+ * e.g. withBase('/writeups/') → '/penguin-portfolio/writeups/' in prod.
+ */
+export function withBase(path = '/'): string {
+  const base = import.meta.env.BASE_URL.replace(/\/+$/, '');
+  return base + '/' + String(path).replace(/^\/+/, '');
+}

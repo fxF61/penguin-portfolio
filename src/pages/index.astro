@@ -4,7 +4,7 @@ import HeroField from '../components/HeroField.astro';
 import Ornament from '../components/Ornament.astro';
 import Lily from '../components/Lily.astro';
 import WriteupCard from '../components/WriteupCard.astro';
-import { getWriteups, getNotes, formatDate } from '../lib';
+import { getWriteups, getNotes, formatDate, withBase } from '../lib';
 
 const writeups = await getWriteups();
 const notes = await getNotes();
@@ -26,8 +26,8 @@ const recentNotes = notes.slice(0, 3);
           domains for sport and writes down how. Field notes from the other shore.
         </p>
         <div class="hero__cta">
-          <a class="btn btn--solid" href="/writeups/">Read the writeups</a>
-          <a class="btn btn--ghost" href="/about/">Who I am</a>
+          <a class="btn btn--solid" href={withBase('/writeups/')}>Read the writeups</a>
+          <a class="btn btn--ghost" href={withBase('/about/')}>Who I am</a>
         </div>
       </div>
 
@@ -48,7 +48,7 @@ const recentNotes = notes.slice(0, 3);
     </div>
     <header class="section__head">
       <h2 class="display">Selected writeups</h2>
-      <a class="section__more" href="/writeups/">All writeups →</a>
+      <a class="section__more" href={withBase('/writeups/')}>All writeups →</a>
     </header>
     <div class="card-grid">
       {featured.map((entry) => <WriteupCard entry={entry} />)}
@@ -59,12 +59,12 @@ const recentNotes = notes.slice(0, 3);
   <section class="wrap section">
     <header class="section__head">
       <h2 class="display">Recent notes</h2>
-      <a class="section__more" href="/notes/">All notes →</a>
+      <a class="section__more" href={withBase('/notes/')}>All notes →</a>
     </header>
     <ul class="note-list" role="list">
       {recentNotes.map((n) => (
         <li class="note-row">
-          <a href={`/notes/${n.id}/`}>
+          <a href={withBase(`/notes/${n.id}/`)}>
             <span class="note-row__title">{n.data.title}</span>
             <span class="note-row__desc">{n.data.description}</span>
           </a>
