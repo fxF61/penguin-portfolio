@@ -1,0 +1,127 @@
+---
+// Enhances article code blocks (<pre>) with an on-brand copy control:
+// a copy→check morph, a Cormorant "Copied" tooltip, and a small burst of
+// real lily petals (the same silhouettes the hero gust uses) — the site's
+// "aftermath" motif echoed on a user action. Renders no server markup; the
+// buttons are attached on the client. Include once per article template.
+---
+<script>
+  // same lily-petal silhouettes as the hero gust (reused, not re-drawn)
+  const PETALS = [
+    'M1 7 Q 20 -1 39 4 Q 22 9 1 7 Z',
+    'M2 5 Q 20 0 38 8 Q 20 12 2 5 Z',
+    'M1 6 Q 20 2.5 39 6 Q 20 9.5 1 6 Z',
+  ];
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+  const rand = (a: number, b: number) => a + Math.random() * (b - a);
+  const COPY = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+  const CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>';
+
+  function burst(host: HTMLElement) {
+    const n = 4 + Math.floor(Math.random() * 3); // 4–6
+    for (let i = 0; i < n; i++) {
+      const p = document.createElement('span');
+      p.className = 'cc-petal';
+      p.style.color = Math.random() < 0.6 ? 'var(--lily)' : '#e7dcd7';
+      const w = rand(9, 15);
+      p.style.width = `${w}px`;
+      p.style.height = `${w * 0.4}px`;
+      p.style.setProperty('--tx', `${rand(-26, 26)}px`);
+      p.style.setProperty('--ty', `${rand(-36, -18)}px`);
+      p.style.setProperty('--r0', `${rand(-30, 30)}deg`);
+      p.style.setProperty('--r1', `${rand(-150, 150)}deg`);
+      p.style.setProperty('--dur', `${rand(0.36, 0.5)}s`);
+      p.innerHTML = `<svg viewBox="0 0 40 12" width="100%" height="100%" preserveAspectRatio="none"><path d="${PETALS[i % PETALS.length]}" fill="currentColor"/></svg>`;
+      host.appendChild(p);
+      p.addEventListener('animationend', () => p.remove(), { once: true });
+    }
+  }
+
+  function enhance(pre: HTMLElement) {
+    if (pre.parentElement?.classList.contains('code-wrap')) return;
+    const wrap = document.createElement('div');
+    wrap.className = 'code-wrap';
+    pre.parentNode!.insertBefore(wrap, pre);
+    wrap.appendChild(pre);
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'code-copy';
+    btn.setAttribute('aria-label', 'Copy code');
+    btn.innerHTML =
+      `<span class="code-copy__ico code-copy__ico--copy">${COPY}</span>` +
+      `<span class="code-copy__ico code-copy__ico--check">${CHECK}</span>` +
+      `<span class="code-copy__tip" aria-hidden="true">Copied</span>`;
+    wrap.appendChild(btn);
+
+    let busy = false;
+    btn.addEventListener('click', async () => {
+      if (busy) return;
+      const code = pre.querySelector('code');
+      const text = (code ? (code as HTMLElement).innerText : pre.innerText).replace(/\n$/, '');
+      try { await navigator.clipboard.writeText(text); } catch (e) { /* no-op */ }
+      busy = true;
+      btn.classList.add('is-copied');
+      btn.setAttribute('aria-label', 'Copied');
+      if (!reduce.matches) burst(btn);
+      window.setTimeout(() => {
+        btn.classList.remove('is-copied');
+        btn.setAttribute('aria-label', 'Copy code');
+        busy = false;
+      }, 1700);
+    });
+  }
+
+  function init() { document.querySelectorAll<HTMLElement>('.prose pre').forEach(enhance); }
+  if (document.readyState !== 'loading') init();
+  else document.addEventListener('DOMContentLoaded', init);
+</script>
+
+<style is:global>
+  .code-wrap { position: relative; }
+
+  .code-copy {
+    position: absolute; top: 0.5rem; right: 0.5rem;
+    display: inline-grid; place-items: center;
+    width: 1.9rem; height: 1.9rem; padding: 0;
+    color: var(--mute);
+    background: color-mix(in srgb, var(--code-bg) 82%, transparent);
+    border: var(--hairline); border-radius: var(--radius-s);
+    cursor: pointer;
+    opacity: 0; transition: opacity var(--dur-1) var(--ease-soft), color var(--dur-1) var(--ease-soft), border-color var(--dur-1) var(--ease-soft);
+  }
+  .code-wrap:hover .code-copy,
+  .code-copy:focus-visible { opacity: 1; }
+  @media (hover: none) { .code-copy { opacity: 1; } }   /* always visible on touch */
+  .code-copy:hover { color: var(--ink-soft); border-color: var(--rule-strong); }
+  .code-copy.is-copied { color: var(--lily); border-color: color-mix(in srgb, var(--lily) 45%, transparent); opacity: 1; }
+
+  /* copy / check are cross-faded in place for a smooth morph */
+  .code-copy__ico { grid-area: 1 / 1; display: grid; place-items: center; transition: opacity var(--dur-1) var(--ease-soft), transform var(--dur-1) var(--ease-soft); }
+  .code-copy__ico svg { width: 0.95rem; height: 0.95rem; display: block; }
+  .code-copy__ico--check { opacity: 0; transform: scale(0.6); }
+  .code-copy.is-copied .code-copy__ico--copy { opacity: 0; transform: scale(0.6); }
+  .code-copy.is-copied .code-copy__ico--check { opacity: 1; transform: scale(1); }
+
+  .code-copy__tip {
+    position: absolute; bottom: calc(100% + 0.4rem); right: 0;
+    font-family: var(--font-display); font-style: italic; font-size: var(--step--1);
+    color: var(--lily); white-space: nowrap;
+    opacity: 0; transform: translateY(3px); pointer-events: none;
+    transition: opacity var(--dur-1) var(--ease-soft), transform var(--dur-1) var(--ease-soft);
+  }
+  .code-copy.is-copied .code-copy__tip { opacity: 1; transform: translateY(0); }
+
+  /* petal burst — spawned at the button, drift up/out, fade. transform+opacity only */
+  .cc-petal {
+    position: absolute; top: 50%; left: 50%; line-height: 0; pointer-events: none;
+    will-change: transform, opacity;
+    animation: cc-fly var(--dur, 0.45s) cubic-bezier(0.35, 0.1, 0.5, 1) forwards;
+  }
+  .cc-petal svg { display: block; width: 100%; height: 100%; overflow: visible; }
+  @keyframes cc-fly {
+    0%   { transform: translate(-50%, -50%) rotate(var(--r0)); opacity: 0.9; }
+    100% { transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) rotate(var(--r1)); opacity: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) { .cc-petal { display: none; } }
+</style>
