@@ -27,10 +27,13 @@ const writeups = defineCollection({
 
 const notes = defineCollection({
   loader: glob({ pattern: '**/[^_]*.md', base: './src/content/notes' }),
-  schema: z.object({
+  schema: ({ image }) => z.object({
     title: z.string(),
     description: z.string(),
     date: z.coerce.date(),
+    /** optional cover art, shown as a thumbnail in the note list */
+    cover: image().optional(),
+    coverAlt: z.string().default(''),
     tags: z.array(z.string()).default([]),
     draft: z.boolean().default(false),
   }),

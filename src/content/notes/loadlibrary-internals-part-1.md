@@ -3,6 +3,8 @@ title: "LoadLibrary Internals Part 1"
 description: "Today lets try to understand how does loadliberary work under the hood one of the basics for reflective DLL injection and DLL injecton"
 date: 2026-03-13
 tags: []
+cover: ../../assets/images/hacker-cover.png
+coverAlt: "LoadLibrary Internals Cover"
 ---
 Today lets try to understand how does loadliberary work under the hood one of the basics for reflective DLL injection and DLL injecton 
 

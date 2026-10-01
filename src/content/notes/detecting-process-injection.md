@@ -3,6 +3,8 @@ title: "Detecting Process Injection with Windows Telemetry"
 description: "How I built an ML-based detection pipeline using ETW and Sysmon, what worked, what broke, and the architectural ceiling I didn't see coming."
 date: 2026-04-07
 tags: ["blog", "windows", "detection", "sysmon", "etw", "machine-learning", "active"]
+cover: ../../assets/images/process-injection-cover.png
+coverAlt: "Process Injection Detection"
 ---
 
 How I built an ML-based detection pipeline using ETW and Sysmon, what worked, what broke, and the architectural ceiling I didn't see coming.

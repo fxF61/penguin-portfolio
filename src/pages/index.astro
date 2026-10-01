@@ -4,6 +4,7 @@ import HeroField from '../components/HeroField.astro';
 import Ornament from '../components/Ornament.astro';
 import Lily from '../components/Lily.astro';
 import WriteupCard from '../components/WriteupCard.astro';
+import { Image } from 'astro:assets';
 import { getWriteups, getNotes, formatDate, withBase } from '../lib';
 
 const writeups = await getWriteups();
@@ -65,8 +66,13 @@ const recentNotes = notes.slice(0, 3);
       {recentNotes.map((n) => (
         <li class="note-row">
           <a href={withBase(`/notes/${n.id}/`)}>
-            <span class="note-row__title">{n.data.title}</span>
-            <span class="note-row__desc">{n.data.description}</span>
+            {n.data.cover && (
+              <Image class="note-row__thumb" src={n.data.cover} alt={n.data.coverAlt} widths={[120, 240]} sizes="7rem" />
+            )}
+            <span class="note-row__text">
+              <span class="note-row__title">{n.data.title}</span>
+              <span class="note-row__desc">{n.data.description}</span>
+            </span>
           </a>
           <time class="meta" datetime={n.data.date.toISOString()}>{formatDate(n.data.date)}</time>
         </li>
@@ -174,13 +180,18 @@ const recentNotes = notes.slice(0, 3);
   /* ---------- note list ---------- */
   .note-list { display: grid; padding: 0; list-style: none; }
   .note-row {
-    display: flex; align-items: baseline; justify-content: space-between;
+    display: flex; align-items: center; justify-content: space-between;
     gap: var(--space-l); flex-wrap: wrap;
     padding-block: var(--space-m);
     border-top: var(--hairline);
   }
   .note-row:last-child { border-bottom: var(--hairline); }
-  .note-row a { display: grid; gap: 0.15rem; text-decoration: none; flex: 1; min-width: 15rem; }
+  .note-row a { display: flex; align-items: center; gap: var(--space-m); text-decoration: none; flex: 1; min-width: 15rem; }
+  .note-row :global(.note-row__thumb) {
+    flex: none; width: 7rem; aspect-ratio: 3 / 2; object-fit: cover;
+    border-radius: var(--radius-s); border: var(--hairline);
+  }
+  .note-row__text { display: grid; gap: 0.15rem; min-width: 0; }
   .note-row__title { font-family: var(--font-display); font-size: var(--step-1); color: var(--ink); transition: color var(--dur-1); }
   .note-row:hover .note-row__title { color: var(--lily-deep); }
   .note-row__desc { color: var(--mute); font-size: var(--step--1); }

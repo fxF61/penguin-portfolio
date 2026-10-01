@@ -3,6 +3,8 @@ title: "DLL Injection: How It Works Under the Hood"
 description: "A deep dive into DLL injection variants and how they work at the Windows API level."
 date: 2026-02-27
 tags: ["blog", "windows", "malware", "dll-injection"]
+cover: ../../assets/images/dll-injection-cover.png
+coverAlt: "DLL Injection"
 ---
 
 #### **What is the Goal of this attack ?**
