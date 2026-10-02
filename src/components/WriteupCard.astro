@@ -21,6 +21,7 @@ const { data } = entry;
   <header class="card__head">
     <span class="eyebrow">{data.platform}</span>
     <span class="card__badges mono">
+      {data.locked && <span class="badge badge--active">Active</span>}
       <span class="badge badge--os" data-os={data.os}>{data.os}</span>
       <span class="badge badge--diff" data-diff={data.difficulty}>{data.difficulty}</span>
     </span>
@@ -102,6 +103,10 @@ const { data } = entry;
     border-radius: var(--radius-pill);
     border: 1px solid var(--rule-strong);
     color: var(--ink-soft);
+  }
+  .badge--active {
+    color: var(--paper); background: var(--lily); border-color: var(--lily);
+    letter-spacing: 0.08em; font-weight: 600;
   }
   .badge--os[data-os='Windows'] { border-color: color-mix(in srgb, var(--stem) 60%, transparent); }
   .badge--diff[data-diff='Easy'] { color: var(--stem); border-color: color-mix(in srgb, var(--stem) 55%, transparent); }

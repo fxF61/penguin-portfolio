@@ -13,6 +13,13 @@ const writeups = defineCollection({
     platform: z.enum(['Hack The Box', 'TryHackMe', 'VulnLab', 'Lab']).default('Hack The Box'),
     os: z.enum(['Windows', 'Linux', 'Other']),
     difficulty: z.enum(['Easy', 'Medium', 'Hard', 'Insane']),
+    /** machine-info card fields (all optional so the old writeups degrade gracefully) */
+    target: z.string().optional(),
+    domain: z.string().optional(),
+    /** 2–4 sentence pentest-report-style overview, shown at the top of the page */
+    executiveSummary: z.string().optional(),
+    /** detected techniques, shown on the info card */
+    techniques: z.array(z.string()).default([]),
     /** optional cover art (machine artwork); optimized via the asset pipeline */
     cover: image().optional(),
     coverAlt: z.string().default(''),
@@ -21,6 +28,8 @@ const writeups = defineCollection({
     chain: z.array(z.string()).default([]),
     featured: z.boolean().default(false),
     retired: z.boolean().default(true),
+    /** active box: show summary + info only, hide the walkthrough body until retired */
+    locked: z.boolean().default(false),
     draft: z.boolean().default(false),
   }),
 });

@@ -3,6 +3,7 @@ import { render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import Ornament from '../../components/Ornament.astro';
 import CodeCopy from '../../components/CodeCopy.astro';
+import MachineInfo from '../../components/MachineInfo.astro';
 import { getWriteups, formatDate, withBase } from '../../lib';
 
 export async function getStaticPaths() {
@@ -12,55 +13,70 @@ export async function getStaticPaths() {
 
 const { entry } = Astro.props;
 const { data } = entry;
-const { Content, headings } = await render(entry);
-const toc = headings.filter((h) => h.depth === 2);
+// Locked (active-box) writeups: skip rendering the markdown body entirely, which
+// keeps the walkthrough AND its screenshots out of the built HTML/assets until
+// `locked` is flipped off at retirement.
+let Content: any = null;
+let toc: { slug: string; text: string }[] = [];
+if (!data.locked) {
+  const r = await render(entry);
+  Content = r.Content;
+  toc = r.headings.filter((h) => h.depth === 2);
+}
 ---
 <Base title={data.title} description={data.description} intensity="calm">
   <article class="wrap article" data-pagefind-body>
     <!-- header -->
     <header class="article__head">
-      <p class="eyebrow eyebrow--lily">{data.platform} · {data.os}</p>
+      <p class="eyebrow eyebrow--lily">{data.platform} · {data.os}{data.locked && <span class="article__active"> · active box</span>}</p>
       <h1 class="display article__title">{data.title}</h1>
       <p class="lede">{data.description}</p>
       <p class="meta article__byline">
         <time datetime={data.date.toISOString()}>{formatDate(data.date)}</time>
-        {data.retired && <span> · retired</span>}
+        {data.retired && !data.locked && <span> · retired</span>}
       </p>
     </header>
 
-    <div class="article__grid">
-      <!-- rail: machine card + attack chain + TOC -->
-      <aside class="rail" data-pagefind-ignore>
-        <dl class="infocard">
-          <div><dt>OS</dt><dd>{data.os}</dd></div>
-          <div><dt>Difficulty</dt><dd>{data.difficulty}</dd></div>
-          <div><dt>Platform</dt><dd>{data.platform}</dd></div>
-        </dl>
+    <!-- machine info + executive summary card -->
+    <MachineInfo entry={entry} />
 
-        {data.chain.length > 0 && (
-          <nav class="chain" aria-label="Attack chain">
-            <p class="chain__label eyebrow">Attack chain</p>
-            <ol class="chain__steps mono" role="list">
-              {data.chain.map((step) => <li>{step}</li>)}
-            </ol>
-          </nav>
-        )}
-
-        {toc.length > 0 && (
-          <nav class="toc" aria-label="On this page">
-            <p class="toc__label eyebrow">On this page</p>
-            <ul role="list">
-              {toc.map((h) => <li><a href={`#${h.slug}`}>{h.text}</a></li>)}
-            </ul>
-          </nav>
-        )}
-      </aside>
-
-      <!-- body -->
-      <div class="prose">
-        <Content />
+    {data.locked ? (
+      <div class="article__locked" data-pagefind-ignore>
+        <p class="eyebrow eyebrow--lily">Active box</p>
+        <p class="article__locked-text">
+          The full walkthrough unlocks when this machine retires. The executive
+          summary above is the public overview.
+        </p>
       </div>
-    </div>
+    ) : (
+      <div class="article__grid">
+        <!-- rail: attack chain + TOC -->
+        <aside class="rail" data-pagefind-ignore>
+          {data.chain.length > 0 && (
+            <nav class="chain" aria-label="Attack chain">
+              <p class="chain__label eyebrow">Attack chain</p>
+              <ol class="chain__steps mono" role="list">
+                {data.chain.map((step) => <li>{step}</li>)}
+              </ol>
+            </nav>
+          )}
+
+          {toc.length > 0 && (
+            <nav class="toc" aria-label="On this page">
+              <p class="toc__label eyebrow">On this page</p>
+              <ul role="list">
+                {toc.map((h) => <li><a href={`#${h.slug}`}>{h.text}</a></li>)}
+              </ul>
+            </nav>
+          )}
+        </aside>
+
+        <!-- body -->
+        <div class="prose">
+          <Content />
+        </div>
+      </div>
+    )}
 
     <Ornament />
     <p class="article__back"><a href={withBase('/writeups/')}>← All writeups</a></p>
@@ -125,6 +141,20 @@ const toc = headings.filter((h) => h.depth === 2);
   .toc ul { list-style: none; padding: 0; display: grid; gap: 0.35em; }
   .toc a { text-decoration: none; color: var(--ink-soft); }
   .toc a:hover { color: var(--lily-deep); }
+
+  .article__active { color: var(--lily); }
+
+  /* locked (active-box) notice shown in place of the walkthrough body */
+  .article__locked {
+    max-width: var(--wrap-narrow);
+    margin: var(--space-xl) 0;
+    padding: var(--space-xl);
+    text-align: center;
+    background: var(--paper-raised);
+    border: var(--hairline);
+    border-radius: var(--radius-m);
+  }
+  .article__locked-text { color: var(--ink-soft); max-width: 46ch; margin: var(--space-xs) auto 0; }
 
   .article__back { margin-top: var(--space-l); }
   .article__back a { font-family: var(--font-label); font-size: var(--step--1); letter-spacing: var(--label-tracking); text-transform: var(--label-transform); text-decoration: none; color: var(--mute); }

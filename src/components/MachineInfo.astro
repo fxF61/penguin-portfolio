@@ -1,0 +1,88 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { formatDate } from '../lib';
+
+interface Props { entry: CollectionEntry<'writeups'>; }
+const { entry } = Astro.props;
+const { data } = entry;
+
+// only the fields that exist render — old writeups degrade gracefully
+const rows: { k: string; v: string; mono?: boolean; diff?: string }[] = [
+  data.target && { k: 'Target', v: data.target, mono: true },
+  data.domain && { k: 'Domain', v: data.domain, mono: true },
+  { k: 'OS', v: data.os },
+  { k: 'Difficulty', v: data.difficulty, diff: data.difficulty },
+  { k: 'Platform', v: data.platform },
+  { k: 'Date', v: formatDate(data.date) },
+].filter(Boolean) as any;
+---
+<aside class="machine" aria-label="Machine information">
+  <dl class="machine__grid">
+    {rows.map((r) => (
+      <div class="machine__cell">
+        <dt>{r.k}</dt>
+        <dd class:list={[{ mono: r.mono }]} data-diff={r.diff}>{r.v}</dd>
+      </div>
+    ))}
+  </dl>
+
+  {data.techniques.length > 0 && (
+    <ul class="machine__tech mono" role="list" aria-label="Techniques">
+      {data.techniques.map((t) => <li>{t}</li>)}
+    </ul>
+  )}
+
+  {data.executiveSummary && (
+    <div class="machine__summary">
+      <p class="machine__summary-label eyebrow">Executive summary</p>
+      <p class="machine__summary-text">{data.executiveSummary}</p>
+    </div>
+  )}
+</aside>
+
+<style>
+  .machine {
+    margin-bottom: var(--space-2xl);
+    padding: var(--space-l) var(--space-xl);
+    background: var(--paper-raised);
+    border: var(--hairline);
+    border-left: 2px solid var(--rose);
+    border-radius: var(--radius-m);
+  }
+  .machine__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
+    gap: var(--space-m) var(--space-l);
+  }
+  .machine__cell dt {
+    font-family: var(--font-label); font-size: var(--step--2);
+    letter-spacing: var(--label-tracking); text-transform: uppercase;
+    color: var(--mute); margin-bottom: 0.25em;
+  }
+  .machine__cell dd { font-size: var(--step-0); color: var(--ink); font-weight: 600; }
+  .machine__cell dd.mono { font-family: var(--font-mono); font-weight: 500; font-size: var(--step--1); overflow-wrap: anywhere; }
+  .machine__cell dd[data-diff='Easy'] { color: var(--stem); }
+  .machine__cell dd[data-diff='Medium'] { color: var(--lily); }
+  .machine__cell dd[data-diff='Hard'],
+  .machine__cell dd[data-diff='Insane'] { color: var(--lily-deep); }
+
+  .machine__tech {
+    display: flex; flex-wrap: wrap; gap: var(--space-2xs) var(--space-s);
+    list-style: none; padding: 0; margin-top: var(--space-l);
+    font-size: var(--step--2); color: var(--mute);
+  }
+  .machine__tech li { padding: 0.15em 0.55em; border: var(--hairline); border-radius: var(--radius-pill); }
+
+  .machine__summary { margin-top: var(--space-l); padding-top: var(--space-l); border-top: var(--hairline); }
+  .machine__summary-label { margin-bottom: var(--space-xs); }
+  .machine__summary-text {
+    font-family: var(--font-display); font-style: italic;
+    font-size: var(--step-1); line-height: 1.5; color: var(--ink-soft);
+    max-width: 70ch;
+  }
+
+  @media (max-width: 34rem) {
+    .machine { padding: var(--space-m) var(--space-l); }
+    .machine__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+</style>
