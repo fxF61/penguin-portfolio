@@ -5,14 +5,18 @@ date: 2026-11-11
 platform: "Hack The Box"
 os: "Windows"
 difficulty: "Insane"
-target: "10.129.232.31"
-domain: "rebound.htb"
-executiveSummary: "This report documents the full compromise of the rebound.htb Active Directory domain, an Insane-rated environment. RID brute forcing exposed the user set, and Kerberoasting performed without pre-authentication through a disabled-pre-auth account yielded a crackable TGS for ldap_monitor. Password reuse led to oorend, whose AddSelf and GenericAll rights over a Service Users OU were abused to reset the winrm_svc account and obtain a foothold. A gMSA (delegator$) was readable only by tbrady, whose NetNTLMv2 hash was captured through a cross-session RemotePotato0 relay and cracked; reading the gMSA password then enabled a constrained-delegation (without protocol transition) S4U chain, bridged via an RBCD trick, to impersonate the Administrator and DCSync the domain, achieving Domain Admin."
 techniques: ["RID brute force", "AS-REP roasting", "Kerberoasting without pre-auth", "bloodyAD", "OU ACL abuse", "gMSA abuse", "Cross-session relay", "RemotePotato0", "Constrained delegation", "RBCD", "S4U2Proxy", "DCSync"]
 tags: ["active-directory", "kerberos", "gmsa", "delegation", "rbcd", "dcsync"]
 cover: ../../assets/images/rebound.png
 coverAlt: "Rebound Hack The Box"
 ---
+
+**Target:**   `10.129.232.31`
+**Domain:**   `rebound.htb`
+**Date:**     November 2026
+**Platform:** Hackthebox
+## Executive Summary
+This report documents the full compromise of the rebound.htb Active Directory domain, an Insane-rated environment. RID brute forcing exposed the user set, and Kerberoasting performed without pre-authentication through a disabled-pre-auth account yielded a crackable TGS for ldap_monitor. Password reuse led to oorend, whose AddSelf and GenericAll rights over a Service Users OU were abused to reset the winrm_svc account and obtain a foothold. A gMSA (delegator$) was readable only by tbrady, whose NetNTLMv2 hash was captured through a cross-session RemotePotato0 relay and cracked; reading the gMSA password then enabled a constrained-delegation (without protocol transition) S4U chain, bridged via an RBCD trick, to impersonate the Administrator and DCSync the domain, achieving Domain Admin.
 
 this is my 1st insane box hope to finish it haha
 
@@ -459,7 +463,7 @@ we goona rid-brute force user until 10k
 seems like none of the user got an hit 
 ![Rebound screenshot 05](../../assets/images/rebound-05.png)
 
-## Foothold — Kerberoasting without Pre-Auth
+## Foothold - Kerberoasting without Pre-Auth
 
 we can try for asrep-roasting with nxc module `--asreproast`
 ```bash
@@ -581,7 +585,7 @@ Nothing specifc on smb share with the newly found credentials
 nor do we have any winrm access
 ![Rebound screenshot 07](../../assets/images/rebound-07.png)
 
-## Lateral Movement — oorend → winrm_svc
+## Lateral Movement - oorend → winrm_svc
 
 lets tro further enumerate by mapping with bloodhound : ) 
 ```bash
@@ -658,7 +662,7 @@ then we can authenticate to winrm service
 
 and grab the user flag 
 
-## Privilege Escalation — Enumerating Delegation
+## Privilege Escalation - Enumerating Delegation
 
 we can check for any delegation , and can see the `delegator$` has constrained delegation on `http//:dc01.rebound.htb`
 ```bash
@@ -857,7 +861,7 @@ LDAP        10.129.232.31   389    DC01             Account: delegator$         
 
 `delegator$ : f8bc57d965eb807f87fc083f260fba88 `
 
-## Domain Admin — S4U & DCSync
+## Domain Admin - S4U & DCSync
 
 As we found earlier `delegator$` has the right to delegate to DC01 using netexec
 > Reference

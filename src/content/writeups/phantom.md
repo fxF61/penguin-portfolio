@@ -5,14 +5,18 @@ date: 2026-11-13
 platform: "VulnLab"
 os: "Windows"
 difficulty: "Medium"
-target: "10.129.234.63"
-domain: "phantom.vl"
-executiveSummary: "This report documents the full compromise of the phantom.vl Active Directory domain. An anonymously readable SMB share exposed a technical-support email whose base64 PDF attachment leaked an onboarding password, which — sprayed across RID-enumerated users — authenticated as ibryant. A departmental share yielded a VeraCrypt backup container that was cracked with a custom wordlist, and a VyOS router configuration inside revealed a cleartext password for the svc_sspr account, granting a WinRM foothold. BloodHound mapped an SSPR-driven path to the DC; a password reset against RNICHOLS was combined with an SPN-less resource-based constrained delegation technique (overpass-the-hash plus setting the TGT session key as the account password) to perform an S4U2Self+U2U into S4U2Proxy impersonation of the Administrator, achieving SYSTEM on the domain controller."
 techniques: ["SMB enumeration", "PDF credential leak", "Password spraying", "VeraCrypt cracking", "BloodHound", "Password reset abuse", "RBCD (SPN-less)", "S4U2Self+U2U", "S4U2Proxy"]
 tags: ["active-directory", "rbcd", "s4u", "veracrypt", "bloodhound"]
 cover: ../../assets/images/phantom.png
 coverAlt: "Phantom VulnLab"
 ---
+
+**Target:**   `10.129.234.63`
+**Domain:**   `phantom.vl`
+**Date:**     November 2026
+**Platform:** Vulnlab
+## Executive Summary
+This report documents the full compromise of the phantom.vl Active Directory domain. An anonymously readable SMB share exposed a technical-support email whose base64 PDF attachment leaked an onboarding password, which - sprayed across RID-enumerated users - authenticated as ibryant. A departmental share yielded a VeraCrypt backup container that was cracked with a custom wordlist, and a VyOS router configuration inside revealed a cleartext password for the svc_sspr account, granting a WinRM foothold. BloodHound mapped an SSPR-driven path to the DC; a password reset against RNICHOLS was combined with an SPN-less resource-based constrained delegation technique (overpass-the-hash plus setting the TGT session key as the account password) to perform an S4U2Self+U2U into S4U2Proxy impersonation of the Administrator, achieving SYSTEM on the domain controller.
 
 ## Initial Recon
 
@@ -469,7 +473,7 @@ SMB         10.129.234.63   445    DC               1136: PHANTOM\vcunningham (S
 SMB         10.129.234.63   445    DC               1137: PHANTOM\SSPR Service (SidTypeGroup)
 ```
 
-## Foothold — Credential Spray (ibryant)
+## Foothold - Credential Spray (ibryant)
 
 now we can spray the password with credential we found on the `pdf`
 ![Phantom screenshot 02](../../assets/images/phantom-02.png)
@@ -627,7 +631,7 @@ archive  auth  config.boot  scripts  support  user-data  vyos-activate.log
                     password "gB6XTcqVP5MlP7Rc"
 ```
 
-## Lateral Movement — svc_sspr
+## Lateral Movement - svc_sspr
 
 Then we can spray the password with grabbed username from `rid-brute`  force![Phantom screenshot 04](../../assets/images/phantom-04.png)
 
@@ -696,7 +700,7 @@ Kerberos support for Dynamic Access Control on this device has been disabled.
 *Evil-WinRM* PS C:\Users\svc_sspr\Desktop> 
 ```
 
-## Privilege Escalation — RBCD to SYSTEM
+## Privilege Escalation - RBCD to SYSTEM
 
 Nothing specfic lets check on bloodhound to see any ACL 
 ![Phantom screenshot 06](../../assets/images/phantom-06.png)
@@ -857,6 +861,9 @@ Impacket v0.14.0.dev0 - Copyright Fortra, LLC and its affiliated companies
 [*] Password was changed successfully.
 [!] User might need to change their password at next logon because we set hashes (unless password never expires is set).
 ```
+
+> It's worth noting that changing the RC4 key (NTLM hash) on an account leaves its RC4 and AES keys out of sync, which can break that account's Kerberos authentication and disrupt the network - so avoid doing this on production or exam engagements.
+
 then we can export the ticket
 ```bash
 ┌──(penguin㉿0X0F)-[~/OSCP/Phantom/loot/config]
@@ -917,7 +924,5 @@ nt authority\system
 
 C:\Users\Administrator\Desktop>
 ```
-
-> Also its worth noting changing the RC4 Key on an account make RC4 and AES key out which can disrupt the network 
 
 ![Phantom screenshot 07](../../assets/images/phantom-07.png)

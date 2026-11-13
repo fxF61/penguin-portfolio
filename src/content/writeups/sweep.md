@@ -5,14 +5,18 @@ date: 2026-11-08
 platform: "VulnLab"
 os: "Windows"
 difficulty: "Medium"
-target: "10.129.234.177"
-domain: "sweep.vl"
-executiveSummary: "This report documents the full compromise of the sweep.vl domain, built around a Lansweeper asset-management deployment. RID brute forcing over a guest session enumerated domain users, and a password spray revealed a weak intern account that granted access to the Lansweeper web console. The console's scanning feature was abused to coerce a service account into authenticating against an attacker-controlled SSH honeypot, leaking the svc_inventory_lnx credentials in cleartext. That account was added to the Lansweeper Admins group (granting WinRM access), and the Lansweeper credential store was decrypted to recover the privileged svc_inventory_win account, which held local administrator rights and completed the compromise."
 techniques: ["RID brute force", "Password spraying", "Lansweeper abuse", "SSH credential harvesting", "bloodyAD", "Group membership abuse", "Credential decryption", "WinRM"]
 tags: ["active-directory", "lansweeper", "credential-harvesting", "winrm"]
 cover: ../../assets/images/sweep.png
 coverAlt: "Sweep VulnLab"
 ---
+
+**Target:**   `10.129.234.177`
+**Domain:**   `sweep.vl`
+**Date:**     November 2026
+**Platform:** Vulnlab
+## Executive Summary
+This report documents the full compromise of the sweep.vl domain, built around a Lansweeper asset-management deployment. RID brute forcing over a guest session enumerated domain users, and a password spray revealed a weak intern account that granted access to the Lansweeper web console. The console's scanning feature was abused to coerce a service account into authenticating against an attacker-controlled SSH honeypot, leaking the svc_inventory_lnx credentials in cleartext. That account was added to the Lansweeper Admins group (granting WinRM access), and the Lansweeper credential store was decrypted to recover the privileged svc_inventory_win account, which held local administrator rights and completed the compromise.
 
 ## Initial Enumeration
 
@@ -247,7 +251,7 @@ we can save the users in `user.txt` file to spray the password ,
 we got an hit of `intern : intern`
 ![Sweep screenshot 06](../../assets/images/sweep-06.png)
 
-## Foothold — Lansweeper Access
+## Foothold - Lansweeper Access
 
 we were able to login to lansweeper with creds : ) also we can try enumerate the smb and winrm with the creds before further going into lansweeper
 ![Sweep screenshot 07](../../assets/images/sweep-07.png)
@@ -260,7 +264,7 @@ also the user `intern` doesnt seem to have any specific ACL to abuse
 
 https://hacktricks.wiki/en/windows-hardening/active-directory-methodology/lansweeper-security.html
 
-## Credential Harvesting — SSH Honeypot
+## Credential Harvesting - SSH Honeypot
 
 while reading hacktricks its seems like we can harvest the credential , by capturing hash with ssh honeypot while the lansweeper try to authenticate to the honeypot !
 ![Sweep screenshot 10](../../assets/images/sweep-10.png)
@@ -317,7 +321,7 @@ WARNING 2026/11/08 19:35:24 Error sending CRLF: EOF
 
 ![Sweep screenshot 15](../../assets/images/sweep-15.png)
 
-## Lateral Movement — Lansweeper Admins
+## Lateral Movement - Lansweeper Admins
 
 we can add the user to Lansweeper admin group with bloodyAD as well as we can see the lans admin members are member of `Remote Management Users` ![Sweep screenshot 16](../../assets/images/sweep-16.png)
 
@@ -346,7 +350,7 @@ sweep\svc_inventory_lnx
 *Evil-WinRM* PS C:\Users\svc_inventory_lnx\Documents> 
 ```
 
-## Privilege Escalation — Administrator
+## Privilege Escalation - Administrator
 
 now we can capture the first user flag , move to escalating to administrator 
 we can decrypt the `svc_inventory_win` using an lansweeper tool
