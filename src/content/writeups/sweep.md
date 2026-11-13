@@ -14,9 +14,9 @@ cover: ../../assets/images/sweep.png
 coverAlt: "Sweep VulnLab"
 ---
 
-## Intial Enumeration
+## Initial Enumeration
 
-## Nmap Scan
+### Nmap Scan
 
 ```bash
 ┌──(penguin㉿0X0F)-[~/OSCP/Sweep]
@@ -247,6 +247,8 @@ we can save the users in `user.txt` file to spray the password ,
 we got an hit of `intern : intern`
 ![Sweep screenshot 06](../../assets/images/sweep-06.png)
 
+## Foothold — Lansweeper Access
+
 we were able to login to lansweeper with creds : ) also we can try enumerate the smb and winrm with the creds before further going into lansweeper
 ![Sweep screenshot 07](../../assets/images/sweep-07.png)
 
@@ -257,6 +259,8 @@ also the user `intern` doesnt seem to have any specific ACL to abuse
 ![Sweep screenshot 09](../../assets/images/sweep-09.png)
 
 https://hacktricks.wiki/en/windows-hardening/active-directory-methodology/lansweeper-security.html
+
+## Credential Harvesting — SSH Honeypot
 
 while reading hacktricks its seems like we can harvest the credential , by capturing hash with ssh honeypot while the lansweeper try to authenticate to the honeypot !
 ![Sweep screenshot 10](../../assets/images/sweep-10.png)
@@ -313,6 +317,8 @@ WARNING 2026/11/08 19:35:24 Error sending CRLF: EOF
 
 ![Sweep screenshot 15](../../assets/images/sweep-15.png)
 
+## Lateral Movement — Lansweeper Admins
+
 we can add the user to Lansweeper admin group with bloodyAD as well as we can see the lans admin members are member of `Remote Management Users` ![Sweep screenshot 16](../../assets/images/sweep-16.png)
 
 ```bash
@@ -339,6 +345,8 @@ Info: Establishing connection to remote endpoint
 sweep\svc_inventory_lnx
 *Evil-WinRM* PS C:\Users\svc_inventory_lnx\Documents> 
 ```
+
+## Privilege Escalation — Administrator
 
 now we can capture the first user flag , move to escalating to administrator 
 we can decrypt the `svc_inventory_win` using an lansweeper tool

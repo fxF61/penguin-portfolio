@@ -459,6 +459,8 @@ we goona rid-brute force user until 10k
 seems like none of the user got an hit 
 ![Rebound screenshot 05](../../assets/images/rebound-05.png)
 
+## Foothold — Kerberoasting without Pre-Auth
+
 we can try for asrep-roasting with nxc module `--asreproast`
 ```bash
 ┌──(penguin㉿0X0F)-[~/OSCP/Rebound]
@@ -579,6 +581,8 @@ Nothing specifc on smb share with the newly found credentials
 nor do we have any winrm access
 ![Rebound screenshot 07](../../assets/images/rebound-07.png)
 
+## Lateral Movement — oorend → winrm_svc
+
 lets tro further enumerate by mapping with bloodhound : ) 
 ```bash
 ┌──(penguin㉿0X0F)-[~/OSCP/Rebound/BD]
@@ -654,6 +658,8 @@ then we can authenticate to winrm service
 
 and grab the user flag 
 
+## Privilege Escalation — Enumerating Delegation
+
 we can check for any delegation , and can see the `delegator$` has constrained delegation on `http//:dc01.rebound.htb`
 ```bash
 ┌──(penguin㉿0X0F)-[~/OSCP/Rebound]
@@ -686,6 +692,8 @@ LDAP        10.129.232.31   389    DC01             Account: delegator$         
 Seems `Tbrady` have the right to read gMSA password : )  !! so lets start focusing on Tbrady
 ![Rebound screenshot 10](../../assets/images/rebound-10.png)
 
+
+## Capturing tbrady via Cross-Session Relay
 
 I tried several  methodology to find `Tbrady` credentials but none of them was succesful if the user have logon session we can use cross-relay section
 ```bash
@@ -835,6 +843,8 @@ Dictionary cache hit:
 TBRADY::rebound:8b746918e24c7157:1536bed793ea0049bf753c06ebcb1234:0101000000000000d905f316bc71dd01162ab20a3a54de230000000002000e007200650062006f0075006e006400010008004400430030003100040016007200650062006f0075006e0064002e006800740062000300200064006300300031002e007200650062006f0075006e0064002e00680074006200050016007200650062006f0075006e0064002e0068007400620007000800d905f316bc71dd01060004000600000008003000300000000000000001000000002000005062490849ffe706f451566e82421b860dbada172bbfcc161b5066fc55bc54aa0a00100000000000000000000000000000000000090000000000000000000000:543BOMBOMBUNmanda
 ```
 
+## gMSA Read & Constrained Delegation
+
 we know Tbraday has right to read gmsa password so we can get `delegato$` NTLM hash
 ```bash
 ┌──(penguin㉿0X0F)-[~/OSCP/Rebound]
@@ -846,6 +856,8 @@ LDAP        10.129.232.31   389    DC01             Account: delegator$         
 ```
 
 `delegator$ : f8bc57d965eb807f87fc083f260fba88 `
+
+## Domain Admin — S4U & DCSync
 
 As we found earlier `delegator$` has the right to delegate to DC01 using netexec
 > Reference

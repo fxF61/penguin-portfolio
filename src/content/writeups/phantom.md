@@ -14,7 +14,7 @@ cover: ../../assets/images/phantom.png
 coverAlt: "Phantom VulnLab"
 ---
 
-## Intial Recon
+## Initial Recon
 
 ```Nmap
 # Nmap 7.98 scan initiated Fri Nov 13 02:56:26 2026 as: /usr/lib/nmap/nmap -p- -Pn -sC -sV -A -T4 -vv -oN Phantom.txt 10.129.234.63
@@ -469,6 +469,8 @@ SMB         10.129.234.63   445    DC               1136: PHANTOM\vcunningham (S
 SMB         10.129.234.63   445    DC               1137: PHANTOM\SSPR Service (SidTypeGroup)
 ```
 
+## Foothold — Credential Spray (ibryant)
+
 now we can spray the password with credential we found on the `pdf`
 ![Phantom screenshot 02](../../assets/images/phantom-02.png)
 
@@ -513,6 +515,8 @@ smb: \IT\Backup\> ls
                 6127103 blocks of size 4096. 2382132 blocks available
 smb: \IT\Backup\> 
 ```
+
+## Looting the VeraCrypt Backup
 
 Lets download the file which is protected by hash which we can try to crack with hashcat with custom wordlist mentioned in the box 
 
@@ -623,6 +627,8 @@ archive  auth  config.boot  scripts  support  user-data  vyos-activate.log
                     password "gB6XTcqVP5MlP7Rc"
 ```
 
+## Lateral Movement — svc_sspr
+
 Then we can spray the password with grabbed username from `rid-brute`  force![Phantom screenshot 04](../../assets/images/phantom-04.png)
 
 As usual we can spray the founded password with nxc 
@@ -689,6 +695,8 @@ User claims unknown.
 Kerberos support for Dynamic Access Control on this device has been disabled.
 *Evil-WinRM* PS C:\Users\svc_sspr\Desktop> 
 ```
+
+## Privilege Escalation — RBCD to SYSTEM
 
 Nothing specfic lets check on bloodhound to see any ACL 
 ![Phantom screenshot 06](../../assets/images/phantom-06.png)
