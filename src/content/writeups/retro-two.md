@@ -4,7 +4,7 @@ description: "A VulnLab AD box pivoting from a cracked Access database and share
 date: 2026-11-17
 platform: "VulnLab"
 os: "Windows"
-difficulty: "Medium"
+difficulty: "Easy"
 techniques: ["SMB enumeration", "office2john", "Password cracking", "RID brute force", "Password spraying", "pre2k abuse", "BloodHound", "Group membership abuse", "Zerologon (CVE-2020-1472)", "secretsdump"]
 tags: ["active-directory", "zerologon", "pre2k", "bloodhound", "password-cracking"]
 cover: ../../assets/images/retro-two.png

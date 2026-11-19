@@ -25,7 +25,12 @@ pre {
   color: var(--code-fg);
   border-radius: var(--radius-s);
   border-left: 2px solid var(--rose);
-  overflow-x: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+  max-height: 32rem;
+  overscroll-behavior: contain;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
   tab-size: 2;
   font-variant-ligatures: none; /* ligatures in shell commands mislead */
 }

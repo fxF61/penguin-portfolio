@@ -2756,9 +2756,9 @@ PS C:\Users\simon.watson\bh> copy C:\Users\simon.watson\bh* \\10.10.17.130\share
 
 After that we can import the json files to Bloodhound to map the relation
 ![Shibuya screenshot 04](../../assets/images/shibuya-04.png)
- `Nigel is a member of T1_ADMINS, which has Enroll rights on the SHIBUYAWEB certificate template a custom template restricted to that group.`
+ Nigel is a member of T1_ADMINS, which has Enroll rights on the SHIBUYAWEB certificate template a custom template restricted to that group.`
 
-> `The combination of Enrollee Supplies Subject + Client Authentication EKU + no manager approval + a controllable group with Enroll rights is  ESC1:.`
+> The combination of Enrollee Supplies Subject + Client Authentication EKU + no manager approval + a controllable group with Enroll rights is  ESC1
 
 ![Shibuya screenshot 05](../../assets/images/shibuya-05.png)
 
