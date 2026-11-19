@@ -7,6 +7,8 @@ os: "Windows"
 difficulty: "Medium"
 techniques: ["SMB enumeration", "office2john", "Password cracking", "RID brute force", "Password spraying", "pre2k abuse", "BloodHound", "Group membership abuse", "Zerologon (CVE-2020-1472)", "secretsdump"]
 tags: ["active-directory", "zerologon", "pre2k", "bloodhound", "password-cracking"]
+cover: ../../assets/images/retro-two.png
+coverAlt: "Retro 2 VulnLab"
 ---
 
 **Target:**   `10.129.98.205`

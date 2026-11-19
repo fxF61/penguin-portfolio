@@ -7,6 +7,8 @@ os: "Windows"
 difficulty: "Hard"
 techniques: ["kerbrute", "Kerberos-only auth", "WIM image analysis", "secretsdump", "DCC2 cracking", "SSH key abuse", "RemotePotato0 coercion", "NTLMv2 cracking", "SOAPHound (ADWS)", "ADCS ESC1", "Certipy"]
 tags: ["active-directory", "adcs", "esc1", "kerberos", "remotepotato", "soaphound"]
+cover: ../../assets/images/shibuya.png
+coverAlt: "Shibuya VulnLab"
 ---
 
 **Target:**   `10.129.234.42`

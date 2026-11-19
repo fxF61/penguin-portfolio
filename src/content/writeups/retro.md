@@ -7,6 +7,8 @@ os: "Windows"
 difficulty: "Easy"
 techniques: ["SMB enumeration", "RID brute force", "Password spraying", "pre2k abuse", "BloodHound", "ADCS ESC1", "Certipy", "LDAP shell"]
 tags: ["active-directory", "adcs", "esc1", "pre2k", "certipy"]
+cover: ../../assets/images/retro.png
+coverAlt: "Retro VulnLab"
 ---
 
 **Target:**   `10.129.234.44`
